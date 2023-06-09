@@ -1,15 +1,18 @@
-# User Guide
+# Developer Guide
 
-## Commands
+## Getting Started
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+### Installation
 
-## Project layout
+    git clone https://github.com/Hack-Weekly/onyx-salamander-headless-cms.git
+    cd onyx-salamander-headless-cms
+    pip3 -m venv env
+    source env/bin/activate
+    pip3 install -r requirements.txt
 
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+### Running App
+
+`uvicorn main:app --reload`
+
+### API 
+API documentation is found at [http://localhost/docs](http://localhost/docs) or [http://localhost/redoc](http://localhost/redoc)
