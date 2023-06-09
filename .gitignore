@@ -1,1 +1,3 @@
-headless-llama/
+venv
+.idea
+__pycache__/
