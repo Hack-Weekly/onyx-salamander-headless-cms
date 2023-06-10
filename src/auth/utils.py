@@ -12,7 +12,7 @@ from datetime import datetime, timedelta
 from models.base import TokenData
 from fastapi import Depends, HTTPException, status
 from onyx import settings
-from models.user import User
+from models.user import User, UserInDB
 
 # RFC 5322 Regex Email Pattern
 EMAIL_VALIDATE_PATTERN = "(?:[a-z0-9!#$%&'*+/=?^_`{|}~-]+(?:\\.[a-z0-9!#$%&'*+/=?^_`{|}~-]+)*|\"(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21\\x23-\\x5b\\x5d-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])*\")@(?:(?:[a-z0-9](?:[a-z0-9-]*[a-z0-9])?\\.)+[a-z0-9](?:[a-z0-9-]*[a-z0-9])?|\\[(?:(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?)\\.){3}(?:25[0-5]|2[0-4][0-9]|[01]?[0-9][0-9]?|[a-z0-9-]*[a-z0-9]:(?:[\\x01-\\x08\\x0b\\x0c\\x0e-\\x1f\\x21-\\x5a\\x53-\\x7f]|\\\\[\\x01-\\x09\\x0b\\x0c\\x0e-\\x7f])+)\\])"
@@ -105,7 +105,7 @@ def GetUser(email: str):
         data = user.data()
         if len(data) > 0:
             user_data = data[0]['user']
-            return User(**user_data)
+            return UserInDB(**user_data)
     return None
 
 def ValidateEmail(email: str):
@@ -152,6 +152,7 @@ def CreateAccessToken(data:dict, expires_delta: Optional[timedelta] = None):
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
 async def GetCurrentUser(token: str = Depends(settings.OAUTH2_SCHEME)):
+
     """GetCurrentUser - Used to decrypt auth tokens and return the user email
     """
     cred_except = HTTPException(
@@ -160,15 +161,15 @@ async def GetCurrentUser(token: str = Depends(settings.OAUTH2_SCHEME)):
         headers = {"WWW-Authenticate", "Bearer"}
     )
     try:
-        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=settings.JWT_ALGORITHMS)
+        payload = jwt.decode(token, settings.SECRET_KEY, algorithms=[settings.JWT_ALGORITHM])
         email: str = payload.get('email')
         if email is None:
             raise cred_except
-        token_data = TokenData(email=email)
+        token_data = TokenData(Email=email)
     except JWTError as e:
         raise cred_except from e
-    
-    user = GetUser(email=token_data.email)
+    print("TOKEN: ", token_data.Email)
+    user = GetUser(token_data.Email)
     if user is None:
         raise cred_except
     return user
