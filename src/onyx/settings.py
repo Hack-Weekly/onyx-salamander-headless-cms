@@ -1,4 +1,4 @@
-"""Settings.py
+"""onyx/settings.py
 
 This file holds global settings for the Onyx Salamander CMS Project.
 
@@ -48,7 +48,7 @@ PWD_CONTEXT = CryptContext(schemes=PASSWORD_SCHEMES,
 
 # Authentication Settings
 AUTH_ENDPOINT = "/auth"
-OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl=f"{AUTH_ENDPOINT}/token")
+OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="auth/token")
 JWT_ALGORITHM = "HS256"
 TOKEN_LIFETIME_MINUTES = 15 # How many minutes an access token is valid
 
@@ -59,7 +59,11 @@ DATABASE_PASS = os.environ.get("DATABASE_PASS", "password")
 # Neo4j Database Driver for convenience
 DB_DRIVER = GraphDatabase.driver(DATABASE_URL,
                                  auth=(DATABASE_USER, DATABASE_PASS))
-
+RESTRICT_DB = False # Whether to restrict database operations
+RESTRICTED_NODES = ["User"] # Nodes that cannot be made through CRUD operations
+NODE_LABELS = [] # List of allowed node labels
+RELATIONSHIP_TYPES = [] # List of relationship types
+BASE_PROPERTIES = ['CreatedBy','CreatedTime']
 # Uvicorn log level
 LOG_LEVEL = "info"
 
@@ -87,7 +91,7 @@ CORS_MAX_AGE = 600  # Max time in seconds to cache cors request
 ALLOW_CREDENTIALS = True
 
 # Allow users to access API via HTTP Basic Authentication
-ENABLE_HTTP_AUTH = True
+ENABLE_HTTP_AUTH = False
 
 # Allow user to access API via Bearer Token Authentiation
 ENABLE_BEARER_AUTH = True

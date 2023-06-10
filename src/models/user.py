@@ -12,7 +12,6 @@ class User(BaseModel):
     """
     ScreenName: str
     Email: str
-    HashedPassword: str
     UUID: Optional[str] = None
     Salt: Optional[str] = None  # Per user salt, randomly generated
     SaltPos: Optional[int] = None  # What position salt is inserted
@@ -24,3 +23,8 @@ class User(BaseModel):
     Joined: Optional[datetime] = None
     Disabled: Optional[bool] = None
     Banned: Optional[bool] = None
+
+class UserInDB(User):
+    """UserInDB class, used to hide stuff like password hashes so we don't send that info back in a response.
+    """
+    HashedPassword: str

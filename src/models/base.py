@@ -11,14 +11,14 @@ class Token(BaseModel):
     """Token represents a bearer token used to authenticate a user
     to the Onyx Salamander API.
     """
-    AccessToken: str
-    TokenType: str
+    access_token: str
+    token_type: str
 
 class TokenData(BaseModel):
     """TokenData contains information about the token that is used
     to authenticate a user to the Onyx Salamander API.
     """
-    Username: Optional[str] = None
+    Email: Optional[str] = None
 
 # Node Response Models
 class NodeBase(BaseModel):
@@ -38,7 +38,7 @@ class NodeBase(BaseModel):
     """
     NODE_ID: int # Internal ID used by Neo4j, DO NOT USE FOR QUERY
     UUID: str # Unique identifier that can be used to query
-    NODES: list
+    LABELS: list
 
 class Node(NodeBase):
     """Node extends the NodeBase to allow for properties to be added to a node
