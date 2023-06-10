@@ -1,0 +1,9 @@
+{
+    "version": "0.2.0",
+    "configurations": {
+        "name": "Python: Onyx Salamander Headless CMS",
+        "type": "python",
+        "request":"launch",
+        "cwd":"${workspaceRoot}/src"
+    }
+}
