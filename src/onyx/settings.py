@@ -53,7 +53,7 @@ JWT_ALGORITHM = "HS256"
 TOKEN_LIFETIME_MINUTES = 15 # How many minutes an access token is valid
 
 # Database Settings
-DATABASE_URL = os.environ.get("DATABASE_URL", "neo4j+s://localhost:7687")
+DATABASE_URL = os.environ.get("DATABASE_URL", "neo4j://localhost:7687")
 DATABASE_USER = os.environ.get("DATABASE_USER", "neo4j")
 DATABASE_PASS = os.environ.get("DATABASE_PASS", "password")
 # Neo4j Database Driver for convenience
@@ -63,7 +63,7 @@ RESTRICT_DB = False # Whether to restrict database operations
 RESTRICTED_NODES = ["User"] # Nodes that cannot be made through CRUD operations
 NODE_LABELS = [] # List of allowed node labels
 RELATIONSHIP_TYPES = [] # List of relationship types
-BASE_PROPERTIES = ['CreatedBy','CreatedTime']
+BASE_PROPERTIES = ['created_by','created_time']
 # Uvicorn log level
 LOG_LEVEL = "info"
 
