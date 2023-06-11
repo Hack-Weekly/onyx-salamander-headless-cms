@@ -25,6 +25,26 @@ HOST = "0.0.0.0"  # IP address of host
 PORT = 8000  # Port of host
 SERVER_TIMEZONE = timezone.utc
 
+# Uvicorn log level
+LOG_LEVEL = "info"
+
+# Static Files
+USE_STATIC = True
+STATIC_ROUTE = "/static"  # The url for accessing static files
+STATIC_DIR = "static"  # The local directory for static files
+
+# Templating
+USE_TEMPLATES = True
+TEMPLATE_DIR = "templates"
+
+# Temporary File Directory
+USE_TEMP_DIR = True
+# Linux Systems
+TEMP_DIR = "/tmp/onyx"
+# Windows Systems Alternative
+# import tempfile
+# TEMP_DIR = tempfile.TemporaryDirectory().name
+
 # Security Settings
 # Secret Key
 # SECURITY WARNING: Keep the secret key used in production secret!
@@ -41,10 +61,10 @@ ALLOWED_HOSTS = ["localhost","0.0.0.0","127.0.0.1"]
 # Password Settings
 FORCE_COMPLEX = True
 PASSWORD_SCHEMES = ["bcrypt"]
-PASSWORD_DEPRECATION = "auto"
+PASSWORD_SCHEMES_DEPRECATED = "auto"
 SALT_SIZE = 32
 PWD_CONTEXT = CryptContext(schemes=PASSWORD_SCHEMES,
-                           deprecated=PASSWORD_DEPRECATION)
+                           deprecated=PASSWORD_SCHEMES_DEPRECATED)
 
 # Authentication Settings
 AUTH_ENDPOINT = "/auth"
@@ -64,14 +84,6 @@ RESTRICTED_NODES = ["User"] # Nodes that cannot be made through CRUD operations
 NODE_LABELS = [] # List of allowed node labels
 RELATIONSHIP_TYPES = [] # List of relationship types
 BASE_PROPERTIES = ['created_by','created_time']
-# Uvicorn log level
-LOG_LEVEL = "info"
-
-# What methods are allowed
-ALLOW_METHODS = ["GET", "POST"]
-
-# Response Headers
-ALLOW_HEADERS = ["*"]
 
 # CORS Settings
 ALLOWED_ORIGINS = [
@@ -79,11 +91,18 @@ ALLOWED_ORIGINS = [
     f"https://{HOST}:{PORT}",
 ]
 
+# What methods are allowed
+ALLOW_METHODS = ["GET", "POST","PUT"]
+
+# Response Headers
+ALLOW_HEADERS = ["*"]
+
 # Add debug CORS headers
 if DEBUG:
     ALLOWED_ORIGINS.append(f"http://localhost:{PORT}")
     ALLOWED_ORIGINS.append(f"https://localhost:{PORT}")
     ALLOWED_ORIGINS.append("http://localhost:*")
+    ALLOWED_ORIGINS.append("*")
 
 CORS_MAX_AGE = 600  # Max time in seconds to cache cors request
 
@@ -115,25 +134,6 @@ MIDDLEWARE = [
         "minimum_size":500
     }
 ]
+# HTTPSRedirectMiddleWare
 if FORCE_SSL and not DEBUG:
     MIDDLEWARE.append({"root":HTTPSRedirectMiddleware})
-
-
-# HTTPSRedirectMiddleWare
-
-# Static Files
-USE_STATIC = True
-STATIC_ROUTE = "/static"  # The url for accessing static files
-STATIC_DIR = "static"  # The local directory for static files
-
-# Templating
-USE_TEMPLATES = True
-TEMPLATE_DIR = "templates"
-
-# Temporary File Directory
-USE_TEMP_DIR = True
-# Linux Systems
-TEMP_DIR = "/tmp/onyx"
-# Windows Systems Alternative
-# import tempfile
-# TEMP_DIR = tempfile.TemporaryDirectory().name

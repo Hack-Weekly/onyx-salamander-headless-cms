@@ -1,17 +1,14 @@
-# Welcome to MkDocs
+# Onyx Salamander Headless CMS
 
-For full documentation visit [mkdocs.org](https://www.mkdocs.org).
+## Version
+**v1.0.0**
 
-## Commands
+## Get Started
 
-* `mkdocs new [dir-name]` - Create a new project.
-* `mkdocs serve` - Start the live-reloading docs server.
-* `mkdocs build` - Build the documentation site.
-* `mkdocs -h` - Print help message and exit.
+Wanna get started right away? Check out our [Quickstart Guide](quickstart.md)
 
-## Project layout
-
-    mkdocs.yml    # The configuration file.
-    docs/
-        index.md  # The documentation homepage.
-        ...       # Other markdown pages, images and other files.
+# Links
+- [About](about.md)
+- [User Guide](user/index.md)
+- [Developer Guide](developer/index.md)
+- [Settings](settings/overview.md)

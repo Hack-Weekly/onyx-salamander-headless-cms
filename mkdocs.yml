@@ -1,9 +1,30 @@
+
 site_name: Onyx Salamander Headless CMS
 site_url: http://onyx-salamander-headless-cms.readthedocs.io/
 nav:
   - Home: index.md
   - About: about.md
   - Quickstart: quickstart.md
-  - User Guide: user/index.md
-  - Developer Guide: dev/index.md
-theme: readthedocs
+  - User Guide:
+    - Overview: user/index.md
+    - Settings:
+      - Overview: user/settings/overview.md
+      - Application Settings: user/settings/app.md
+      - Middleware: user/settings/middleware.md
+      - Security Settings:
+        - Authentication Settings: user/settings/security/auth.md
+        - SSL Settings: user/settings/security/ssl.md
+        - Password Settings: user/settings/security/password.md
+        - CORS Settings: user/settings/security/cors.md
+      - Database Settings: user/settings/database.md    
+  - Developer Guide:
+    - Overview: dev/index.md
+theme:
+  name: readthedocs
+  collapse_navigation: true
+  highlightjs: true
+  nav_style: light
+  hljs_languages:
+      - yaml
+      - python
+  logo: img/logo_blank.png
