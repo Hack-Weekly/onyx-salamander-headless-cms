@@ -3,7 +3,7 @@ import React, { Component } from "react";
 import "../css/register.css";
 
 export default class register extends Component {
-  backend_url = "https://localhost:8000/";
+  backend_url = "http://localhost:8000/";
   constructor(props) {
     super(props);
 
@@ -93,7 +93,7 @@ export default class register extends Component {
     };
 
     // registering in the backend
-    let resp = await fetch(this.backend_url + "register", {
+    let resp = await fetch(this.backend_url + "auth/register", {
       method: "POST",
       mode: "cors",
       cache: "no-cache",
@@ -172,7 +172,7 @@ export default class register extends Component {
             <input type={"number"} name="phone" value={this.state.phone} onChange={this.handleChange}></input>
             <br />
             <br />
-            <button className="btn regiterBtn">Sign Up</button>
+            <button className="btn regiterBtn" onClick={this.submitDetails}>Sign Up</button>
           </div>
         </div>
       </React.Fragment>

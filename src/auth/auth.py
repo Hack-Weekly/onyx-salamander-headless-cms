@@ -4,7 +4,7 @@ Onyx Salamander API Authentication Routes
 """
 import uuid
 from fastapi import APIRouter, HTTPException, status
-from fastapi.security import OAuth2PasswordBearer, OAuth2PasswordRequestForm, HTTPBasicCredentials, HTTPBasic
+from fastapi.security import OAuth2PasswordRequestForm, HTTPBasicCredentials, HTTPBasic
 from typing import Optional, List
 from onyx import settings
 from auth.utils import *
