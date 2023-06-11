@@ -1,0 +1,57 @@
+html {
+  height: 100%;
+}
+body {
+  height: 100%;
+  background-image: linear-gradient(to right top, #051937, #004d7a, #008793, #00bf72, #a8eb12);
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+.reg_title {
+  color: #30336b;
+}
+
+.register_card {
+  /* border: 1px solid red; */
+  margin-top: 3vh;
+  margin-bottom: 3vh;
+  padding: 30px;
+  border-radius: 20px;
+  z-index: 100;
+}
+
+/* .register_container {
+  border: 1px solid black;
+  margin-bottom: 3vh;
+} */
+
+label {
+  font-size: 18px;
+}
+
+input {
+  border: none;
+  border-bottom: 1px solid black;
+  width: 50%;
+  height: 40px;
+  background-color: transparent;
+}
+
+.regiterBtn {
+  /* border: 1px solid  */
+  background-color: #badc58;
+  /* color: white; */
+}
+
+.regiterBtn:hover {
+  /* border: 1px solid #badc58; */
+  background-color: #30336b;
+  color: white;
+  transform: translateY(-2px);
+}
+@media only screen and (max-width: 600px) {
+  input {
+    width: 100%;
+  }
+}
