@@ -4,7 +4,6 @@ This file contains the base models for the NEO4J graphing database.
 """
 from typing import Optional, List
 from pydantic import BaseModel
-#from datetime import datetime
 
 # Auth Response Model
 class Token(BaseModel):
