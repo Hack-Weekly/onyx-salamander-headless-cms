@@ -99,9 +99,9 @@ def GetUser(email: str):
             if user:
                 # User found!
     """
-    cypher_search = 'MATCH (user:User) WHERE user.Email = $email RETURN user'
+    cypher_search = f"MATCH (user:User) WHERE user.Email = '{email}' RETURN user"
     with settings.DB_DRIVER.session() as session:
-        user = session.run(query=cypher_search, parameters={'email':email})
+        user = session.run(query=cypher_search)
         data = user.data()
         if len(data) > 0:
             user_data = data[0]['user']
@@ -182,3 +182,11 @@ async def GetCurrentActiveUser(current: User = Depends(GetCurrentUser)):
     if current.Banned:
         raise HTTPException(status_code=400, detail="User Banned.")
     return current
+
+def GetCurrentActiveUserAllowGuest(required: bool = False):
+    """GetCurrentUserAllowGuest  
+    """
+    async def _get_user(current: User = Depends(GetCurrentActiveUser)):
+        if not required and not current:
+            return None
+    return _get_user

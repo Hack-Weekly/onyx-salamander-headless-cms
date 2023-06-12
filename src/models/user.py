@@ -7,6 +7,7 @@ from pydantic import BaseModel
 from typing import Optional, List
 from onyx import settings
 
+
 class User(BaseModel):
     """User class contains the structure of users within the graph database.
     """
@@ -18,11 +19,13 @@ class User(BaseModel):
     Phone: Optional[str] = None
     FirstName: Optional[str] = None
     MiddleName: Optional[str] = None
+    # Metadata
     LastName: Optional[str] = None
     LastSeen: Optional[datetime] = None
     Joined: Optional[datetime] = None
-    Disabled: Optional[bool] = None
-    Banned: Optional[bool] = None
+    Disabled: Optional[bool] = False
+    Banned: Optional[bool] = False
+    Admin: Optional[bool] = False
 
 class UserInDB(User):
     """UserInDB class, used to hide stuff like password hashes so we don't send that info back in a response.
