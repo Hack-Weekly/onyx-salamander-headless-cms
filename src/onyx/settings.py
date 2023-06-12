@@ -83,7 +83,7 @@ RESTRICT_DB = False # Whether to restrict database operations
 RESTRICTED_NODES = ["User"] # Nodes that cannot be made through CRUD operations
 NODE_LABELS = [] # List of allowed node labels
 RELATIONSHIP_TYPES = [] # List of relationship types
-BASE_PROPERTIES = ['created_by','created_time']
+BASE_PROPERTIES = ["created_by","created_time","CreatedDate","ModifiedDate","Creator","Modifier"]
 
 # CORS Settings
 ALLOWED_ORIGINS = [

@@ -142,7 +142,7 @@ async def UpdateURL(url: str,
      WHERE url.URL = "{url}"
      SET url += $attributes
      SET url.Modifier = "{user.UUID}"
-     SET url.ModifiedTime = "{time}"
+     SET url.ModifiedDate = "{time}"
     """
     if description:
         cypher += f"SET url.Description = '{description}'\n" 
