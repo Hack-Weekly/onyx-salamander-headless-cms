@@ -9,9 +9,9 @@ from datetime import datetime
 from models.base import Node
 
 class BlogPost(BaseModel):
-
+    UUID: str
     Title: str
-    Author: str
+    #Author: str 
     Content: str
     Published: Optional[bool] = False
     Tags: Optional[List[str]] = None

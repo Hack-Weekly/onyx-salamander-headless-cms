@@ -68,7 +68,7 @@ PWD_CONTEXT = CryptContext(schemes=PASSWORD_SCHEMES,
 
 # Authentication Settings
 AUTH_ENDPOINT = "/auth"
-OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="auth/token")
+OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="auth/token",auto_error=False)
 JWT_ALGORITHM = "HS256"
 TOKEN_LIFETIME_MINUTES = 15 # How many minutes an access token is valid
 

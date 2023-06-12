@@ -2,21 +2,17 @@
 
 This file handles CRUD functionality for Pages in the Onyx Salamander CMS
 """
-import uuid
 from typing import Optional, List
 from datetime import datetime
 from fastapi import APIRouter, Depends, HTTPException, status
 
 # Import utilities for database access & Page model
 from onyx import settings
-from auth.auth import GetCurrentActiveUser, GetCurrentActiveUserAllowGuest
-from models.base import Relationship
+from auth.auth import GetCurrentActiveUser
 from models.user import User
-from models.file import File
-from models.comment import Comment
-from models.page import Page, URI, Link
+from models.page import Page
 
-from onyx.crud.url import _CreateURL, GetURL
+from onyx.crud.url import _CreateURL
 
 # Setup API Router
 router = APIRouter()
@@ -176,7 +172,7 @@ async def UpdatePage(url:str, attributes:dict, user:User = Depends(GetCurrentAct
     cypher = f"""MATCH (page:Page) WHERE page.URL = "{url}"
     SET page += $attributes
     SET page.Modifier = "{user.UUID}"
-    SET page.ModifiedTime = "{time}"
+    SET page.ModifiedDate = "{time}"
     RETURN page
     """
     if "URL" in attributes.keys():

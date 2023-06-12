@@ -103,7 +103,6 @@ async def ReadURL(url: str, user: User = Depends(GetCurrentActiveUserAllowGuest)
     url = GetURL(url=url)
     # Check if requires access
     if url.RequiresAuth:
-        user = await user()
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -179,7 +178,6 @@ async def ListURL(limit:int=25,
                   user: User = Depends(GetCurrentActiveUserAllowGuest)):
     """ListURL returns a list of URLs
     """
-    user = await user()
     if not user:
         cypher = f"""MATCH (url:URL)
         WHERE url.RequiresAuth = False
