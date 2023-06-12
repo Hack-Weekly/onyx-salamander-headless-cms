@@ -16,7 +16,13 @@ from models.user import User
 # Set API Router
 router = APIRouter()
 
-@router.post("/create_node", response_model=Node)
+ROUTE = {
+        "router":router,
+        "prefix":"/crud",
+        "tags":["CRUD"]
+} 
+
+@router.post("/create/node", response_model=Node)
 async def CreateNode(label: str, node_attributes: dict,
                      current_user: User = Depends(GetCurrentActiveUser)):
     """CreateNode - Creates a node with label and attributes
@@ -25,7 +31,7 @@ async def CreateNode(label: str, node_attributes: dict,
         current_user: User
 
         Usage:
-            Accessed by route /create_node
+            Accessed by route /create/node
     """
     # Check that node is not a restricted Node
     if label in settings.RESTRICTED_NODES:
@@ -79,7 +85,7 @@ async def CreateNode(label: str, node_attributes: dict,
                 LABELS=node_data["labels"],
                 Properties=node_data["new_node"])
 # List Nodes
-@router.get("/list_nodes", response_model=Nodes)
+@router.get("/list/nodes", response_model=Nodes)
 async def ListNodes(limit:int=25, current_user: User=Depends(GetCurrentActiveUser)):
     """ListNodes, lists as many nodes as requested"""
     cypher = f"""MATCH (node)
@@ -99,7 +105,7 @@ async def ListNodes(limit:int=25, current_user: User=Depends(GetCurrentActiveUse
     return Nodes(Nodes=node_list)
 
 # Search Nodes
-@router.get("/search_nodes", response_model=Nodes)
+@router.get("/search/nodes", response_model=Nodes)
 async def SearchNodes(node_property: str, property_value: str,
                     current_user: User = Depends(GetCurrentActiveUser)):
     """SearchNodes
@@ -122,7 +128,7 @@ async def SearchNodes(node_property: str, property_value: str,
     return Nodes(Nodes=node_list)
 
 # Update Node
-@router.put("/update/{node_id}")
+@router.put("/update/node/{node_id}")
 async def UpdateNode(node_id: int, attributes: dict, current_user: User = Depends(GetCurrentActiveUser)):
     cypher = """MATCH (node) WHERE ID(node) = $id
     SET node += $attributes
@@ -138,7 +144,7 @@ async def UpdateNode(node_id: int, attributes: dict, current_user: User = Depend
                 **node_data["node"])
 
 # Delete Node
-@router.post("/delete/{node_id}")
+@router.post("/delete/node/{node_id}")
 async def DeleteNode(node_id: int, current_user: User = Depends(GetCurrentActiveUser)):
     cypher = f"""
     MATCH (node)
@@ -153,7 +159,7 @@ async def DeleteNode(node_id: int, current_user: User = Depends(GetCurrentActive
     }
 
 # Relationships
-@router.post("/create_relationship", response_model=Relationship)
+@router.post("/create/relationship", response_model=Relationship)
 async def CreateRelationship(source_label: str, source_property:str, source_value:str,
                              target_label: str, target_property:str, target_value:str,
                              relationship_type:str, relationship_attributes:Optional[dict]=None,
@@ -212,9 +218,9 @@ async def CreateRelationship(source_label: str, source_property:str, source_valu
                         SourceNode=source,
                         TargetNode=target)
 
-# Get data about a relationship
-@router.get("/get_relationship/{relationship_id}", response_model=Relationship)
-async def get_relationship(relationship_id: int, user:User = Depends(GetCurrentActiveUser)):
+# Read data about a relationship
+@router.get("/read/relationship/{relationship_id}", response_model=Relationship)
+async def ReadRelationship(relationship_id: int, user:User = Depends(GetCurrentActiveUser)):
     cypher = f"""
     MATCH (nodeA)-[relationship]->(nodeB)
     WHERE ID(relationship) = {relationship_id}
@@ -239,7 +245,7 @@ async def get_relationship(relationship_id: int, user:User = Depends(GetCurrentA
                         TargetNode=target)
 
 # Update Relationship
-@router.put("/update_relationship/{relationship_id}", response_model=Relationship)
+@router.put("/update/relationship/{relationship_id}", response_model=Relationship)
 async def UpdateRelationship(relationship_id: int, attributes: dict, user:User = Depends(GetCurrentActiveUser)):
     cypher = """
     MATCH (nodeA)-[relationship]->(nodeB)
@@ -271,7 +277,7 @@ async def UpdateRelationship(relationship_id: int, attributes: dict, user:User =
                         TargetNode=target)
 
 # Delete relationship
-@router.post("/delete_relationship/{relationship_id}")
+@router.post("/delete/relationship/{relationship_id}")
 async def DeleteRelationship(relationship_id: int, user:User = Depends(GetCurrentActiveUser)):
     cypher = f"""
     MATCH (nodeA)-[relationship]->(nodeB)

@@ -6,8 +6,9 @@ from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 import uvicorn
-from onyx import crud, settings
+from onyx import settings
 import auth.auth as auth
+from onyx.routes import ImportRoutes
 
 # Setup App
 app = FastAPI(
@@ -38,20 +39,22 @@ for ware in settings.MIDDLEWARE:
         **ware
     )
 
+# Include Routes
+ImportRoutes(app)
 # Authentication Routes
-app.include_router(
-    auth.router,
-    prefix=settings.AUTH_ENDPOINT,
-    tags=["Authorization"]
-)
-
-# Crud Routes
-app.include_router(
-    crud.router,
-    prefix="/crud",
-    tags=["CRUD"]
-)
-
+#app.include_router(
+#    auth.router,
+#    prefix=settings.AUTH_ENDPOINT,
+#    tags=["Authorization"]
+#)
+#
+## Crud Routes
+#app.include_router(
+#    core.router,
+#    prefix="/crud",
+#    tags=["CRUD"]
+#)
+#
 # Root Example URL
 @app.get("/")
 async def root():

@@ -15,9 +15,13 @@ from datetime import datetime
 # API Router
 router = APIRouter()
 
+ROUTE = {
+        "router":router,
+        "prefix":settings.AUTH_ENDPOINT,
+        "tags":["Authorization"]
+} 
+
 # Endpoint for registration
-
-
 @router.post("/register")
 async def RegisterUser(screenName: str, email: str, password: str,
                        phone: Optional[str] = None,
