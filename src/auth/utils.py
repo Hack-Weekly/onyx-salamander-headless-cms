@@ -151,10 +151,8 @@ def CreateAccessToken(data:dict, expires_delta: Optional[timedelta] = None):
     to_encode["exp"] = expire
     return jwt.encode(to_encode, settings.SECRET_KEY, algorithm=settings.JWT_ALGORITHM)
 
-async def GetCurrentUser(token: str = Depends(settings.OAUTH2_SCHEME)):
-
-    """GetCurrentUser - Used to decrypt auth tokens and return the user email
-    """
+def ReadToken(token: str):
+    """Returns the token data"""
     cred_except = HTTPException(
         status_code = status.HTTP_401_UNAUTHORIZED,
         detail = "Could not validate credentials.",
@@ -168,7 +166,15 @@ async def GetCurrentUser(token: str = Depends(settings.OAUTH2_SCHEME)):
         token_data = TokenData(Email=email)
     except JWTError as e:
         raise cred_except from e
-    print("TOKEN: ", token_data.Email)
+    return token_data, cred_except
+
+async def GetCurrentUser(token: str = Depends(settings.OAUTH2_SCHEME)):
+
+    """GetCurrentUser - Used to decrypt auth tokens and return the user email
+    """
+    if not token:
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED)
+    token_data, cred_except = ReadToken(token=token)
     user = GetUser(token_data.Email)
     if user is None:
         raise cred_except
@@ -183,10 +189,18 @@ async def GetCurrentActiveUser(current: User = Depends(GetCurrentUser)):
         raise HTTPException(status_code=400, detail="User Banned.")
     return current
 
-def GetCurrentActiveUserAllowGuest(required: bool = False):
+async def GetCurrentActiveUserAllowGuest(token: str = Depends(settings.OAUTH2_SCHEME)):
     """GetCurrentUserAllowGuest  
     """
-    async def _get_user(current: User = Depends(GetCurrentActiveUser)):
-        if not required and not current:
+    if not token:
+        return None
+    else:
+        token_data, _ = ReadToken(token=token)
+        current = GetUser(token_data.Email)
+        if not current:
             return None
-    return _get_user
+        if current.Disabled:
+            raise HTTPException(status_code=400, detail="User Inactive.")
+        if current.Banned:
+            raise HTTPException(status_code=400, detail="User Banned.")
+        return current

@@ -68,7 +68,7 @@ PWD_CONTEXT = CryptContext(schemes=PASSWORD_SCHEMES,
 
 # Authentication Settings
 AUTH_ENDPOINT = "/auth"
-OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="auth/token")
+OAUTH2_SCHEME = OAuth2PasswordBearer(tokenUrl="auth/token",auto_error=False)
 JWT_ALGORITHM = "HS256"
 TOKEN_LIFETIME_MINUTES = 15 # How many minutes an access token is valid
 
@@ -83,7 +83,7 @@ RESTRICT_DB = False # Whether to restrict database operations
 RESTRICTED_NODES = ["User"] # Nodes that cannot be made through CRUD operations
 NODE_LABELS = [] # List of allowed node labels
 RELATIONSHIP_TYPES = [] # List of relationship types
-BASE_PROPERTIES = ['created_by','created_time']
+BASE_PROPERTIES = ["created_by","created_time","CreatedDate","ModifiedDate","Creator","Modifier"]
 
 # CORS Settings
 ALLOWED_ORIGINS = [

@@ -35,7 +35,7 @@ class Page(BaseModel):
     Headline: str
     Language: str
     PageType: str
-    URL: str
+    URL: Optional[str] = None
     Intro: Optional[str] = None
     Tagline: Optional[str] = None
     Description: Optional[str] = None

@@ -36,7 +36,7 @@ class NodeBase(BaseModel):
     when an object is deleted.)
     """
     NODE_ID: int # Internal ID used by Neo4j, DO NOT USE FOR QUERY
-    UUID: str # Unique identifier that can be used to query
+    UUID: Optional[str] = None # Unique identifier that can be used to query
     LABELS: list
 
 class Node(NodeBase):
@@ -59,8 +59,8 @@ class Relationship(BaseModel):
     """
     RelationshipID: int
     RelationshipType: str
-    SourceNode: Node
-    TargetNode: Node
+    SourceNode: Node or BaseModel
+    TargetNode: Node or BaseModel
     Properties: Optional[dict] = None
 
 # Query Response Models

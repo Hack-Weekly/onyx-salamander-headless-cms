@@ -103,7 +103,6 @@ async def ReadURL(url: str, user: User = Depends(GetCurrentActiveUserAllowGuest)
     url = GetURL(url=url)
     # Check if requires access
     if url.RequiresAuth:
-        user = await user()
         if not user:
             raise HTTPException(
                 status_code=status.HTTP_401_UNAUTHORIZED,
@@ -142,7 +141,7 @@ async def UpdateURL(url: str,
      WHERE url.URL = "{url}"
      SET url += $attributes
      SET url.Modifier = "{user.UUID}"
-     SET url.ModifiedTime = "{time}"
+     SET url.ModifiedDate = "{time}"
     """
     if description:
         cypher += f"SET url.Description = '{description}'\n" 
@@ -179,7 +178,6 @@ async def ListURL(limit:int=25,
                   user: User = Depends(GetCurrentActiveUserAllowGuest)):
     """ListURL returns a list of URLs
     """
-    user = await user()
     if not user:
         cypher = f"""MATCH (url:URL)
         WHERE url.RequiresAuth = False
