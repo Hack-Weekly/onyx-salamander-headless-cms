@@ -26,6 +26,10 @@ if settings.USE_STATIC:
     app.mount(settings.STATIC_ROUTE,
               StaticFiles(directory=settings.STATIC_DIR),
               name="static")
+    
+#    app.mount("/uploads",
+#              StaticFiles(directory=settings.UPLOAD_DIR),
+#              name="uploads")
 
 # Handle templating
 if settings.USE_TEMPLATES:

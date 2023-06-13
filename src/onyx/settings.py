@@ -5,8 +5,10 @@ This file holds global settings for the Onyx Salamander CMS Project.
 """
 # Imports
 import os
+import hashlib
 from datetime import timezone
 from neo4j import GraphDatabase
+from onyx.storage.base import StorageDriver
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.middleware.trustedhost import TrustedHostMiddleware
 from fastapi.middleware.gzip import GZipMiddleware
@@ -34,8 +36,10 @@ STATIC_ROUTE = "/static"  # The url for accessing static files
 STATIC_DIR = "static"  # The local directory for static files
 
 # Templating
-USE_TEMPLATES = True
+USE_TEMPLATES = False #True
 TEMPLATE_DIR = "templates"
+
+# Storage Settings
 
 # Temporary File Directory
 USE_TEMP_DIR = True
@@ -44,6 +48,12 @@ TEMP_DIR = "/tmp/onyx"
 # Windows Systems Alternative
 # import tempfile
 # TEMP_DIR = tempfile.TemporaryDirectory().name
+
+# Permanent Storage
+HASH_FILES = False #True # Whether to hash files for security purposes
+HASH_FUNC = hashlib.sha256 # The hash function to use
+UPLOAD_DIR = "./uploads" # The upload directory
+STORAGE_DRIVER = StorageDriver(UPLOAD_DIR)
 
 # Security Settings
 # Secret Key
