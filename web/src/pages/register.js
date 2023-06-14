@@ -148,8 +148,8 @@ export default class register extends Component {
         cache: "no-cache",
         headers,
         referrerPolicy: "no-referrer",
-        body: JSON.stringify({ screenName: "HAPPY_GUY", email: "hap@hap.com", password: "Abcd123$#" }),
-        // body: JSON.stringify(data),
+        // body: JSON.stringify({ screenName: "HAPPY_GUY", email: "hap@hap.com", password: "Abcd123$#" }),
+        body: JSON.stringify(data),
       });
 
       let res = await resp.json();
