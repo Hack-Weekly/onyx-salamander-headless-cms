@@ -110,6 +110,7 @@ ALLOW_HEADERS = ["*"]
 # Add debug CORS headers
 if DEBUG:
     ALLOWED_ORIGINS.append(f"http://localhost:{PORT}")
+    # ALLOWED_ORIGINS.append(f"http://localhost:3000")
     ALLOWED_ORIGINS.append(f"https://localhost:{PORT}")
     ALLOWED_ORIGINS.append("http://localhost:*")
     ALLOWED_ORIGINS.append("*")
