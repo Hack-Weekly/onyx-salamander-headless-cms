@@ -117,6 +117,7 @@ ALLOW_HEADERS = ["*"]
 # Add debug CORS headers
 if DEBUG:
     ALLOWED_ORIGINS.append(f"http://localhost:{PORT}")
+    # ALLOWED_ORIGINS.append(f"http://localhost:3000")
     ALLOWED_ORIGINS.append(f"https://localhost:{PORT}")
 
 CORS_MAX_AGE = 600  # Max time in seconds to cache cors request

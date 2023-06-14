@@ -31,6 +31,8 @@ async def register_user(user:UserRegister):
     """Checks if a user exists and if not registers the new user, and
     returns the User instance.
     """
+
+
     # Check email validity
     if not ValidateEmail(user.email):
         raise HTTPException(

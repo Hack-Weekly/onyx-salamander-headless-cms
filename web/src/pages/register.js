@@ -15,7 +15,7 @@ export default class register extends Component {
       fname: "",
       mname: "",
       lname: "",
-      phone: null,
+      phone: "",
       not_entered: true,
     };
   }
@@ -89,23 +89,76 @@ export default class register extends Component {
       fname: this.state.fname,
       mname: this.state.mname,
       lname: this.state.lname,
-      phone: JSON.stringify(this.state.phone), // phone number is string in backend
+      phone: this.state.phone === "" ? null : JSON.stringify(this.state.phone), // phone number is string in backend
     };
 
     // registering in the backend
-    let resp = await fetch(this.backend_url + "auth/register", {
-      method: "POST",
-      mode: "cors",
-      cache: "no-cache",
-      headers: {
-        "Content-Type": "application/json",
-        // 'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      referrerPolicy: "no-referrer",
-      body: JSON.stringify(data),
-    });
+    try {
+      let resp = await fetch(this.backend_url + "auth/register", {
+        method: "POST",
+        // mode: "cors",
+        mode: "no-cors",
+        cache: "no-cache",
+        headers: {
+          "Content-Type": "application/json",
+          // 'Content-Type': 'application/x-www-form-urlencoded',
+        },
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify(data),
+      });
 
-    console.log(resp);
+      console.log(resp);
+    } catch (error) {
+      console.log(error);
+      alert("Failed to submit data! Server Error");
+    }
+  };
+
+  submitDetailsTEST = async () => {
+    let data = {
+      screenName: "HAPPY_GUY",
+      email: "hap@hap.com",
+      password: "Abcd123$#",
+      fname: "happu",
+      mname: "naasd",
+      lname: "asdasd",
+      phone: "1234567890", // phone number is string in backend
+    };
+
+    // registering in the backend
+
+    let headers = new Headers();
+
+    headers.append("Content-Type", "application/json");
+    headers.append("Accept", "application/json");
+
+    headers.append("Access-Control-Allow-Origin", "http://localhost:3000");
+    headers.append("Access-Control-Allow-Credentials", "true");
+    headers.append("Access-Control-Allow-Methods", "POST");
+    headers.append("Access-Control-Allow-Headers", "Content-Type, Authorization");
+
+    headers.append("GET", "POST", "OPTIONS");
+
+    try {
+      // let resp = await fetch(this.backend_url + "register", {
+      let resp = await fetch(this.backend_url + "auth/register", {
+        method: "POST",
+        credentials: "include",
+        mode: "cors",
+        cache: "no-cache",
+        headers,
+        referrerPolicy: "no-referrer",
+        body: JSON.stringify({ screenName: "HAPPY_GUY", email: "hap@hap.com", password: "Abcd123$#" }),
+        // body: JSON.stringify(data),
+      });
+
+      let res = await resp.json();
+      console.log(resp);
+      console.log(res);
+    } catch (error) {
+      console.log(error);
+      alert("Failed to submit data! Server Error");
+    }
   };
 
   render() {
@@ -172,7 +225,13 @@ export default class register extends Component {
             <input type={"number"} name="phone" value={this.state.phone} onChange={this.handleChange}></input>
             <br />
             <br />
-            <button className="btn regiterBtn" onClick={this.submitDetails}>Sign Up</button>
+            <button className="btn regiterBtn" onClick={this.submitDetails}>
+              Sign Up
+            </button>
+
+            <button className="btn regiterBtn" onClick={this.submitDetailsTEST}>
+              TEST
+            </button>
           </div>
         </div>
       </React.Fragment>
