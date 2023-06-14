@@ -1,4 +1,4 @@
-"""onyx/crud/crud_page.py
+"""onyx/blog/page.py
 
 This file handles CRUD functionality for Pages in the Onyx Salamander CMS
 """
@@ -17,14 +17,15 @@ from onyx.blog.url import _CreateURL
 # Setup API Router
 router = APIRouter()
 # Create a second one so we can also link pages to root /
-page_router = APIRouter() 
+page_router = APIRouter()
 ROUTE = {
-        "router":router,
-        "prefix":"/crud",
-        "tags":["Page"]
+    "router": router,
+    "prefix": "/page",
+    "tags": ["Page"]
 }
 
-def GetPage(url:Optional[str]=None, title:Optional[str]=None):
+
+def GetPage(url: Optional[str] = None, title: Optional[str] = None):
     if url:
         cypher_search = f"MATCH (page:Page) WHERE page.URL = '{url}' RETURN page"
     elif title:
@@ -35,7 +36,8 @@ def GetPage(url:Optional[str]=None, title:Optional[str]=None):
         if result:
             return Page(**result[0]["page"])
 
-def UpdatePageURL(original:str, new:str, user:User, delete_old:bool = True):
+
+def UpdatePageURL(original: str, new: str, user: User, delete_old: bool = True):
     # Create new URL
     _CreateURL(url=new, user=user)
     # Detach & Delete url
@@ -57,55 +59,56 @@ def UpdatePageURL(original:str, new:str, user:User, delete_old:bool = True):
         page = session.run(query=cypher).data()[0]["page"]
     return Page(**page)
 
-@router.post("/create/page", response_model=Page)
-async def CreatePage(title: str, headline:str, language:str,
-                     pageType:str, url:Optional[str]=None, intro:Optional[str]=None,
-                     tagline:Optional[str]=None,
-                     description:Optional[str]=None,
-                     keywords:Optional[List[str]] = None,
-                     publishDate: Optional[datetime] = None,
-                     reviewDate: Optional[datetime] = None,
-                     archiveDate: Optional[datetime] = None,
-                     user: User = Depends(GetCurrentActiveUser)
-                     ):
+
+@router.post("/create", response_model=Page)
+async def create_page(title: str, headline: str, language: str,
+                      pageType: str, url: Optional[str] = None, intro: Optional[str] = None,
+                      tagline: Optional[str] = None,
+                      description: Optional[str] = None,
+                      keywords: Optional[List[str]] = None,
+                      publishDate: Optional[datetime] = None,
+                      reviewDate: Optional[datetime] = None,
+                      archiveDate: Optional[datetime] = None,
+                      user: User = Depends(GetCurrentActiveUser)
+                      ):
     """CreatePage - Creates a new page"""
     # Check that Page does not exist
     if GetPage(title=title):
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Operation not permitted. Page with Title: {title} already exists.",
-            headers={"WWW-Authenticate":"Bearer"}
+            headers={"WWW-Authenticate": "Bearer"}
         )
     date = str(datetime.now(settings.SERVER_TIMEZONE))
 
     attributes = {
-        "Title":title,
-        "Headline":headline,
-        "Language":language,
-        "PageType":pageType,
-        "Creator":user.UUID,
-        "Modifier":user.UUID,
-        "Owner":user.UUID,
+        "Title": title,
+        "Headline": headline,
+        "Language": language,
+        "PageType": pageType,
+        "Creator": user.UUID,
+        "Modifier": user.UUID,
+        "Owner": user.UUID,
         "CreatedDate": date,
         "ModifiedDate": date,
         "PublishDate": date,
     }
     if url:
-        attributes["URL"]=url
+        attributes["URL"] = url
     if publishDate:
-        attributes["PublishDate"]=publishDate
+        attributes["PublishDate"] = publishDate
     if intro:
-        attributes["Intro"]=intro
+        attributes["Intro"] = intro
     if tagline:
-        attributes["Tagline"]=tagline
+        attributes["Tagline"] = tagline
     if description:
-        attributes["Description"]=description
+        attributes["Description"] = description
     if keywords:
-        attributes["Keywords"]=keywords
+        attributes["Keywords"] = keywords
     if reviewDate:
-        attributes["ReviewDate"]=reviewDate
+        attributes["ReviewDate"] = reviewDate
     if archiveDate:
-        attributes["ArchiveDate"]=archiveDate
+        attributes["ArchiveDate"] = archiveDate
 
     cypher = f"""MATCH (user:User) WHERE user.UUID = "{user.UUID}"
     CREATE (page:Page $params)
@@ -115,22 +118,25 @@ async def CreatePage(title: str, headline:str, language:str,
         _CreateURL(url=url, user=user, description=description)
         cypher += f"""MATCH (url:URL) WHERE url.URL = "{url}"
         CREATE (url)-[relationship2:LINKS]->(page)"""
-        
+
     cypher += "RETURN page"
-    
+
     with settings.DB_DRIVER.session() as session:
-        res = session.run(query=cypher, parameters={"params":attributes})
+        res = session.run(query=cypher, parameters={"params": attributes})
         page = res.data()[0]
-        page=page["page"]
+        page = page["page"]
 
     return Page(**page)
 
 # Read Pages
+
+
 @page_router.get("/{url}", response_model=Page)
-@router.post("/read/page/", response_model=Page)
-async def ReadPage(url: Optional[str]=None, title: Optional[str]=None):
+@router.post("/read/", response_model=Page)
+async def read_page(url: Optional[str] = None,
+                    title: Optional[str] = None):
     if url:
-       p = GetPage(url=url)
+        p = GetPage(url=url)
     elif title:
         p = GetPage(title=title)
     else:
@@ -146,8 +152,10 @@ async def ReadPage(url: Optional[str]=None, title: Optional[str]=None):
     return p
 
 # List Pages
+
+
 @router.get("/list/pages", response_model=List[Page])
-async def ListPages(limit:int=25):
+async def list_pages(limit: int = 25):
     cypher = f"MATCH (page:Page) return page LIMIT {limit}"
     out = []
     with settings.DB_DRIVER.session() as session:
@@ -158,15 +166,19 @@ async def ListPages(limit:int=25):
     return out
 
 # Update Pages
-@router.put("/update/page/{url}", response_model=Page)
-async def UpdatePage(url:str, attributes:dict, user:User = Depends(GetCurrentActiveUser)):
+
+
+@router.put("/update/{url}", response_model=Page)
+async def update_page(url: str,
+                      attributes: dict,
+                      user: User = Depends(GetCurrentActiveUser)):
     time = str(datetime.now(settings.SERVER_TIMEZONE))
     page = GetPage(url=url)
     if page and not page.Owner == user.UUID:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"You do not have write access to {url}.",
-            headers={"WWW-Authenticate":"Bearer"}
+            headers={"WWW-Authenticate": "Bearer"}
         )
     cypher = f"""MATCH (page:Page) WHERE page.URL = "{url}"
     SET page += $attributes
@@ -192,26 +204,31 @@ async def UpdatePage(url:str, attributes:dict, user:User = Depends(GetCurrentAct
                     raise HTTPException(
                         status_code=status.HTTP_401_UNAUTHORIZED,
                         detail=f"You do not have write access to page {url}.",
-                        headers={"WWW-Authenticate":"Bearer"}
+                        headers={"WWW-Authenticate": "Bearer"}
                     )
             else:
                 raise HTTPException(
                     status_code=status.HTTP_401_UNAUTHORIZED,
                     detail=f"You do not have write access to {url}.",
-                    headers={"WWW-Authenticate":"Bearer"}
+                    headers={"WWW-Authenticate": "Bearer"}
                 )
-        update = session.run(query=cypher, parameters={"attributes":attributes}).data()[0]
+        update = session.run(query=cypher, parameters={
+                             "attributes": attributes}).data()[0]
     return Page(**update["page"])
- 
+
 # Delete Pages
-@router.post("/delete/page/{url}")
-async def DeletePage(url:str, del_url:bool = True, user:User = Depends(GetCurrentActiveUser)):
+
+
+@router.post("/delete/{url}")
+async def delete_page(url: str,
+                      del_url: bool = True,
+                      user: User = Depends(GetCurrentActiveUser)):
     page = GetPage(url=url)
     if page and not page.Owner == user.UUID:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
             detail=f"You do not have write access to {url}.",
-            headers={"WWW-Authenticate":"Bearer"}
+            headers={"WWW-Authenticate": "Bearer"}
         )
     cypher = f"""MATCH (page:Page) WHERE page.URL = "{url}"
     MATCH (url:URL) WHERE url.URL = "{url}"
@@ -224,5 +241,5 @@ async def DeletePage(url:str, del_url:bool = True, user:User = Depends(GetCurren
         rel = result.data()
     # rel should be empty, if not this _should_ return an error message
     return rel or {
-        "response":f"Page {url} was successfully deleted."
+        "response": f"Page {url} was successfully deleted."
     }

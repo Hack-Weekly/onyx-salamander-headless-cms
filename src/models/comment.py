@@ -7,12 +7,13 @@ from typing import Optional, List
 from pydantic import BaseModel
 from datetime import datetime
 
+
 class Comment(BaseModel):
     UUID: str
     Message: str
     # LinkedFiles: Optional[List[str]] = None
     Published: Optional[bool] = None
-    
+
     # Metadata
     Creator: Optional[str] = None
     Likes: Optional[int] = None

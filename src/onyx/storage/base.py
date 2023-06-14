@@ -2,19 +2,22 @@
 
 Holds the base file StorageDrive class for the Onyx CMS System
 """
-import os, os.path
+import os
+import os.path
 import shutil
 from fastapi.responses import FileResponse
 from onyx.storage.utils import secure_filename
-from onyx.storage.errors import UnauthorizedFileType, FileExists, OperationNotSupported, FileNotFound
+from onyx.storage.errors import FileExists
+
 
 class StorageDriver:
     """This class contains functionality for managing storage.
     """
+
     def __init__(self, UPLOAD_DIR):
         self.name = "LOCAL_DRIVER"
         self.upload_dir = UPLOAD_DIR
-        
+
     def Exists(self, filename):
         """Checks if a file exists.
 
@@ -49,9 +52,8 @@ class StorageDriver:
         fpath = os.path.join(self.upload_dir, filename)
         if not self.Exists(filename):
             raise FileNotFoundError(filename)
-        res = FileResponse(fpath,filename=db_name)
-        #content = open(fpath, "rb")
-        return res #,content
+        res = FileResponse(fpath, filename=db_name)
+        return res
 
     def DeleteFile(self, filename):
         """Deletes a given file in the local storage.

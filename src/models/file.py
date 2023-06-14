@@ -6,6 +6,7 @@ from typing import Optional
 from pydantic import BaseModel
 from datetime import datetime
 
+
 class File(BaseModel):
     """File represents any file stored within the Onyx CMS database.
     """

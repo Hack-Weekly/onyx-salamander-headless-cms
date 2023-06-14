@@ -8,13 +8,13 @@ from auth import auth
 # Authentication Routes
 ROUTES = [
     auth.ROUTE,
-    page.ROUTE,
-    page.page_router,
-    core.ROUTE,
-    url.ROUTE,
     post.ROUTE,
+    comment.ROUTE,
+    core.ROUTE,
     file.ROUTE,
-    comment.ROUTE
+    page.ROUTE,
+    url.ROUTE,
+    page.page_router,
 ]
 
 

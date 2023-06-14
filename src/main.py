@@ -5,7 +5,6 @@ The main API server file.
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-import uvicorn
 from onyx import settings
 import auth.auth as auth
 from onyx.routes import ImportRoutes
@@ -18,7 +17,7 @@ app = FastAPI(
     docs_url=settings.DOCS_URL,
     redoc_url=settings.REDOC_URL,
     debug=settings.DEBUG,
-    
+
 )
 
 # Mount static directory
@@ -33,7 +32,7 @@ if settings.USE_TEMPLATES:
 
 # Load Middleware
 for ware in settings.MIDDLEWARE:
-    r = ware.pop('root') # Pull the first item off
+    r = ware.pop('root')  # Pull the first item off
     app.add_middleware(
         r,
         **ware
@@ -51,4 +50,3 @@ async def root():
     Returns the index of the API
     """
     return {"message": "Hello World"}
-

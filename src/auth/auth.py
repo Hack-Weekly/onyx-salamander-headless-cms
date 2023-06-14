@@ -5,7 +5,9 @@ Onyx Salamander API Authentication Routes
 import uuid
 from fastapi import APIRouter, HTTPException, status
 from fastapi.security import OAuth2PasswordRequestForm, HTTPBasicCredentials, HTTPBasic
-from typing import Optional, List
+from typing import Optional
+
+# Onyx imports
 from onyx import settings
 from auth.utils import *
 from models.base import Token, TokenData
@@ -16,14 +18,16 @@ from datetime import datetime
 router = APIRouter()
 
 ROUTE = {
-        "router":router,
-        "prefix":settings.AUTH_ENDPOINT,
-        "tags":["Authorization"]
-} 
+    "router": router,
+    "prefix": settings.AUTH_ENDPOINT,
+    "tags": ["Authorization"]
+}
 
 # Endpoint for registration
+
+
 @router.post("/register")
-async def RegisterUser(screenName: str, email: str, password: str,
+async def register_user(screenName: str, email: str, password: str,
                        phone: Optional[str] = None,
                        fname: Optional[str] = None,
                        mname: Optional[str] = None,
@@ -55,7 +59,7 @@ async def RegisterUser(screenName: str, email: str, password: str,
         "ScreenName": screenName,
         "Email": email,
         "HashedPassword": phash,
-        "UUID":str(uuid.uuid4()),
+        "UUID": str(uuid.uuid4()),
         "Salt": salt,
         "SaltPos": saltPos,
         "Phone": phone,
@@ -87,7 +91,7 @@ async def RegisterUser(screenName: str, email: str, password: str,
 
 
 @router.post("/login", response_model=User)
-async def LoginHTTPBasic(credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
+async def login_HTTP_basic(credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
     if not settings.ENABLE_HTTP_AUTH:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="HTTP Basic Authentication Has Been Disabled.")
@@ -100,8 +104,9 @@ async def LoginHTTPBasic(credentials: HTTPBasicCredentials = Depends(HTTPBasic()
         )
     return user
 
+
 @router.post("/token", response_model=Token)
-async def LoginAccessToken(form_data: OAuth2PasswordRequestForm = Depends(), expires: Optional[timedelta] = None):
+async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(), expires: Optional[timedelta] = None):
     if not settings.ENABLE_BEARER_AUTH:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Token Authentication Has Been Disabled")

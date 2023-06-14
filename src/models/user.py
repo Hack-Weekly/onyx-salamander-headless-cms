@@ -4,8 +4,7 @@ This file contains the models needed for User interaction
 """
 from datetime import datetime
 from pydantic import BaseModel
-from typing import Optional, List
-from onyx import settings
+from typing import Optional
 
 
 class User(BaseModel):
@@ -26,6 +25,7 @@ class User(BaseModel):
     Disabled: Optional[bool] = False
     Banned: Optional[bool] = False
     Admin: Optional[bool] = False
+
 
 class UserInDB(User):
     """UserInDB class, used to hide stuff like password hashes so we don't send that info back in a response.

@@ -6,12 +6,15 @@ from typing import Optional, List
 from pydantic import BaseModel
 
 # Auth Response Model
+
+
 class Token(BaseModel):
     """Token represents a bearer token used to authenticate a user
     to the Onyx Salamander API.
     """
     access_token: str
     token_type: str
+
 
 class TokenData(BaseModel):
     """TokenData contains information about the token that is used
@@ -20,6 +23,8 @@ class TokenData(BaseModel):
     Email: Optional[str] = None
 
 # Node Response Models
+
+
 class NodeBase(BaseModel):
     """NodeBase represents a 'node' in the graph database system.
 
@@ -35,9 +40,10 @@ class NodeBase(BaseModel):
     database is not guaranteed to be unique for each object (they are reused
     when an object is deleted.)
     """
-    NODE_ID: int # Internal ID used by Neo4j, DO NOT USE FOR QUERY
-    UUID: Optional[str] = None # Unique identifier that can be used to query
+    NODE_ID: int  # Internal ID used by Neo4j, DO NOT USE FOR QUERY
+    UUID: Optional[str] = None  # Unique identifier that can be used to query
     LABELS: list
+
 
 class Node(NodeBase):
     """Node extends the NodeBase to allow for properties to be added to a node
@@ -48,12 +54,15 @@ class Node(NodeBase):
     """
     Properties: Optional[dict] = None
 
+
 class Nodes(BaseModel):
     """Nodes is a helper class that allows us to return a list of Nodes.
     """
     Nodes: List[Node]
 
 # Relationship Response Models
+
+
 class Relationship(BaseModel):
     """Relationship represents a relationship between two nodes.
     """
@@ -64,6 +73,8 @@ class Relationship(BaseModel):
     Properties: Optional[dict] = None
 
 # Query Response Models
+
+
 class Query(BaseModel):
     """Query represents the response returned when querying the neo4j database
     """

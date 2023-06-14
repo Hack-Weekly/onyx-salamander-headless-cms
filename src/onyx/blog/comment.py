@@ -14,7 +14,7 @@ from auth.auth import GetCurrentActiveUser
 from models.user import User
 from models.comment import Comment
 from models.file import File
-from onyx.blog.file import CreateFile, DeleteFile
+from onyx.blog.file import create_file, delete_file
 
 # Setup API Router
 router = APIRouter()
@@ -58,14 +58,17 @@ def GetComment(UUID: str, GetAttached=False):
                 return Comment(**res[0]["comment"])
 
 # Create a comment
-
-
 @router.post("/create", response_model=Comment)
-async def CreateComment(message: str,
-                        commentOn: str,
-                        linkedFiles: Optional[List[UploadFile]] = None,
-                        published: Optional[bool] = True,
-                        user: User = Depends(GetCurrentActiveUser)):
+async def create_comment(message: str,
+                         commentOn: str,
+                         # NOT USED:
+                         _: Optional[List[str]] = None, 
+                         # _ Added because /docs can't send proper request without it
+                         # Removing gives the error: Did not find CR at end of boundary (59)
+                         # IDFK what that even means ¯\_(ツ)_/¯
+                         linkedFiles: Optional[List[UploadFile]] = None,
+                         published: Optional[bool] = True,
+                         user: User = Depends(GetCurrentActiveUser)):
     UUID = str(uuid.uuid4())
     date = str(datetime.now(settings.SERVER_TIMEZONE))
     attributes = {
@@ -91,7 +94,7 @@ async def CreateComment(message: str,
         # Upload each file and attach to comment
         i = 0
         for file in linkedFiles:
-            f = await CreateFile(file, user=user)
+            f = await create_file(file, user=user)
             if f:
                 cypher_matches += f"""
                 MATCH (file{i}:File)
@@ -105,14 +108,21 @@ async def CreateComment(message: str,
     with settings.DB_DRIVER.session() as session:
         res = session.run(query=cypher, parameters={
                           "params": attributes}).data()
-
-    return Comment(**res[0]["comment"])
+        if res:
+            return Comment(**res[0]["comment"])
+    # Failed, delete uploads
+    for file in linkedFiles:
+        await delete_file(UUID=file.UUID, user=user)
+    raise HTTPException(
+        status_code=status.HTTP_404_NOT_FOUND,
+        detail=f"Object {commentOn} not found.",
+    )
 
 # List Comments
 
 
 @router.get("/list/{UUID}", response_model=List[Comment])
-async def ListComments(UUID: str):
+async def list_comments(UUID: str):
     """Returns all comments attached to an item
     """
     cypher = """MATCH (comment:Comment)-[r:ON]->(n {UUID: $uid})
@@ -130,24 +140,25 @@ async def ListComments(UUID: str):
 
 
 @router.get("/read/{UUID}")
-async def ReadComment(UUID: str, GetAttached: bool = True):
+async def read_comment(UUID: str, GetAttached: bool = True):
     return GetComment(UUID=UUID, GetAttached=GetAttached)
 
 # Update Comment
 
 
 @router.put("/update/{UUID}", response_model=Comment)
-async def UpdateComment(UUID: str, message: Optional[str] = None,
-                        deleteFiles: Optional[List[str]] = None,
-                        linkedFiles: Optional[List[UploadFile]] = None,
-                        published: Optional[bool] = True,
-                        user: User = Depends(GetCurrentActiveUser)):
+async def update_comment(UUID: str, message: Optional[str] = None,
+                         deleteFiles: Optional[List[str]] = None,
+                         linkedFiles: Optional[List[UploadFile]] = None,
+                         published: Optional[bool] = True,
+                         user: User = Depends(GetCurrentActiveUser)):
     date = str(datetime.now(settings.SERVER_TIMEZONE))
     attributes = {
-        "Message": message,
         "Published": published,
         "ModifiedDate": date,
     }
+    if message:
+        attributes["Message"] = message
     c = GetComment(UUID=UUID, GetAttached=True)
     comment = c["Comment"]
     files = c["Attachments"]
@@ -160,9 +171,9 @@ async def UpdateComment(UUID: str, message: Optional[str] = None,
     if deleteFiles and files:
         for file in files:
             if file.UUID in deleteFiles:
-                await DeleteFile(UUID=file.UUID, user=user)
+                await delete_file(UUID=file.UUID, user=user)
             elif file.Filename in deleteFiles:
-                await DeleteFile(UUID=file.UUID, user=user)
+                await delete_file(UUID=file.UUID, user=user)
 
     cypher_matches = f"""MATCH (comment:Comment)
     WHERE comment.UUID = "{UUID}"
@@ -174,7 +185,7 @@ async def UpdateComment(UUID: str, message: Optional[str] = None,
         # Upload each file and attach to comment
         i = 0
         for file in linkedFiles:
-            f = await CreateFile(file, user=user)
+            f = await create_file(file, user=user)
             if f:
                 cypher_matches += f"""
                 MATCH (file{i}:File)
@@ -189,25 +200,29 @@ async def UpdateComment(UUID: str, message: Optional[str] = None,
     cypher += """ SET comment += $attributes
     RETURN comment
     """
+    print("CYUPHER: ", cypher)
 
     with settings.DB_DRIVER.session() as session:
         res = session.run(query=cypher, parameters={
                           "attributes": attributes}).data()
-    return Comment(**res[0]["comment"])
+        print(res)
+        return Comment(**res[0]["comment"])
 
 # Delete Comment
 
 
 @router.post("/delete/{UUID}")
-async def DeleteComment(UUID: str,
-                        deleteLinked: bool = True,
-                        user: User = Depends(GetCurrentActiveUser)):
-    """DeleteComment()
+async def delete_comment(UUID: str,
+                         deleteLinked: bool = True,
+                         user: User = Depends(GetCurrentActiveUser)):
+    """delete_comment()
 
     UUID:str - Comment UUID
     deleteLinked - Whether to delete linked files
     """
-    comment, files = GetComment(UUID=UUID, GetAttached=True)
+    c = GetComment(UUID=UUID, GetAttached=True)
+    comment = c["Comment"]
+    files = c["Attachments"]
     if not comment:
         raise HTTPException(
             status_code=status.HTTP_404_NOT_FOUND,
@@ -220,9 +235,9 @@ async def DeleteComment(UUID: str,
         )
     if deleteLinked and files != None:
         for file in files:
-            await DeleteFile(UUID=file.UUID, user=user)
+            await delete_file(UUID=file.UUID, user=user)
     cypher = f"""MATCH (comment:Comment)
-    WHERE comment.UUID = {UUID}
+    WHERE comment.UUID = "{UUID}"
     DETACH DELETE comment
     """
     with settings.DB_DRIVER.session() as session:
