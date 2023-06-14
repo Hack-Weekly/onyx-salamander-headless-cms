@@ -15,7 +15,7 @@ from models.user import User
 from models.group import Group
 from models.file import File
 from models.comment import Comment
-from models.page import Page, URI, Link
+from models.page import Page, URI
 
 # Setup API Router
 router = APIRouter()

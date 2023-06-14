@@ -5,8 +5,6 @@ This file contains the Page models for the Onyx Salamander CMS database.
 from typing import Optional, List
 from pydantic import BaseModel
 from datetime import datetime
-from models.base import Node
-from models.comment import Comment
 
 class URI(BaseModel):
     """URI represents a URL within the Onyx Salamander CMS
@@ -55,21 +53,3 @@ class Page(BaseModel):
     ReviewDate: Optional[datetime] = None
     ArchiveDate: Optional[datetime] = None
     
-
-# Link Model
-class Link(BaseModel):
-    """Links represent hyperlinks in the Onyx Salamander CMS
-    """
-    Title: str
-    URL: URI
-    Flyover: Optional[str] = None
-    # Metadata
-    Keywords: Optional[str] = None
-    # User Metadata
-    Creator: Optional[str] = None # Who created the page
-    Modifier: Optional[str] = None # Who last modified page
-    # Datetime Metadata
-    CreatedDate: Optional[datetime] = None
-    ModifiedDate: Optional[datetime] = None
-    PublishDate: Optional[datetime] = None # Can be used to time page creation
-    ArchiveDate: Optional[datetime] = None

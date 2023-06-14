@@ -15,7 +15,7 @@ from models.base import Relationship
 from models.user import User
 from models.group import Group
 from models.comment import Comment
-from models.page import Page, URI, Link
+from models.page import Page, URI
 
 # Setup API Router
 router = APIRouter()
@@ -39,12 +39,9 @@ def GetBlogPost(UUID:Optional[str]=None,title:Optional[str]=None,user:Optional[U
 
     cypher_search += " RETURN post"
 
-    print("CY",cypher_search)
-
     with settings.DB_DRIVER.session() as session:
         result = session.run(query=cypher_search).data()
         if result:
-            print(result)
             return BlogPost(**result[0]["post"])
 
 # Create

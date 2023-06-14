@@ -6,20 +6,20 @@ CMS database.
 from typing import Optional, List
 from pydantic import BaseModel
 from datetime import datetime
-from models.base import Node
-from models.user import User
-from models.file import File
 
-class Comment(Node):
+class Comment(BaseModel):
+    UUID: str
     Message: str
-    LinkedFiles: Optional[List[File]] = None
-    Published: Optional[bool] = True
+    # LinkedFiles: Optional[List[str]] = None
+    Published: Optional[bool] = None
     
     # Metadata
-    Creator: Optional[User] = None
-    LikedBy: List[Optional[User]] = None
-    DislikedBy: List[Optional[User]] = None
+    Creator: Optional[str] = None
+    Likes: Optional[int] = None
+    Dislikes: Optional[int] = None
+    # LikedBy: List[Optional[str]] = None
+    # DislikedBy: List[Optional[str]] = None
 
     # Datetime Metadata
-    CreatedDate: Optional[datetime]
-    ModifiedDate: Optional[datetime]
+    CreatedDate: Optional[datetime] = None
+    ModifiedDate: Optional[datetime] = None

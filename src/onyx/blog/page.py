@@ -12,7 +12,7 @@ from auth.auth import GetCurrentActiveUser
 from models.user import User
 from models.page import Page
 
-from onyx.crud.url import _CreateURL
+from onyx.blog.url import _CreateURL
 
 # Setup API Router
 router = APIRouter()
@@ -34,7 +34,6 @@ def GetPage(url:Optional[str]=None, title:Optional[str]=None):
         result = session.run(query=cypher_search).data()
         if result:
             return Page(**result[0]["page"])
-    return False
 
 def UpdatePageURL(original:str, new:str, user:User, delete_old:bool = True):
     # Create new URL

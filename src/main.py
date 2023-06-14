@@ -41,20 +41,8 @@ for ware in settings.MIDDLEWARE:
 
 # Include Routes
 ImportRoutes(app)
-# Authentication Routes
-#app.include_router(
-#    auth.router,
-#    prefix=settings.AUTH_ENDPOINT,
-#    tags=["Authorization"]
-#)
-#
-## Crud Routes
-#app.include_router(
-#    core.router,
-#    prefix="/crud",
-#    tags=["CRUD"]
-#)
-#
+
+
 # Root Example URL
 @app.get("/")
 async def root():
