@@ -8,6 +8,10 @@ export default class navbar extends Component {
     this.state = { isLoggedIn };
   }
 
+  logout = () => {
+    // TODO
+  };
+
   render() {
     return (
       <React.Fragment>
@@ -41,13 +45,21 @@ export default class navbar extends Component {
                 </li>
               </ul>
               <form className="d-flex">
-                <a className="btn btn-outline-success" href="/login">
-                  Login
-                </a>{" "}
-                &nbsp;&nbsp;
-                <a className="btn btn-outline-success" href="/register">
-                  Sign Up
-                </a>
+                {this.state.isLoggedIn ? (
+                  <button className="btn btn-danger" onClick={this.logout}>
+                    Logout
+                  </button>
+                ) : (
+                  <React.Fragment>
+                    <a className="btn btn-outline-success" href="/login">
+                      Login
+                    </a>{" "}
+                    &nbsp;&nbsp;
+                    <a className="btn btn-outline-success" href="/register">
+                      Sign Up
+                    </a>
+                  </React.Fragment>
+                )}
               </form>
             </div>
           </div>
