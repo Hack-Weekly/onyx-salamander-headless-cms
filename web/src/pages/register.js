@@ -86,18 +86,18 @@ export default class register extends Component {
       screenName: this.state.screenName,
       email: this.state.email,
       password: this.state.password,
-      fname: this.state.fname,
-      mname: this.state.mname,
-      lname: this.state.lname,
-      phone: this.state.phone === "" ? null : JSON.stringify(this.state.phone), // phone number is string in backend
+      fname: this.state.fname || "null",
+      mname: this.state.mname || "null",
+      lname: this.state.lname || "null",
+      phone: this.state.phone || "null", //=== "" ? null : JSON.stringify(this.state.phone), // phone number is string in backend
     };
 
     // registering in the backend
     try {
       let resp = await fetch(this.backend_url + "auth/register", {
         method: "POST",
-        // mode: "cors",
-        mode: "no-cors",
+        credentials: "include",
+        mode: "cors",
         cache: "no-cache",
         headers: {
           "Content-Type": "application/json",
