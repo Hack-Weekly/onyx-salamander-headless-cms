@@ -5,12 +5,8 @@ The main API server file.
 from fastapi import FastAPI
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
-<<<<<<< HEAD
-=======
 # from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.cors import CORSMiddleware
-import uvicorn
->>>>>>> a986d7ab5bc29d03349ca2f6316e26358f72149b
 from onyx import settings
 import auth.auth as auth
 from onyx.routes import ImportRoutes
@@ -23,10 +19,7 @@ app = FastAPI(
     docs_url=settings.DOCS_URL,
     redoc_url=settings.REDOC_URL,
     debug=settings.DEBUG,
-<<<<<<< HEAD
 
-=======
->>>>>>> a986d7ab5bc29d03349ca2f6316e26358f72149b
 )
 
 # Mount static directory
@@ -59,7 +52,8 @@ ImportRoutes(app)
 # enabling cors and necessary headers and methods for it
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "localhost:3000"],
+    allow_origins=["http://localhost:3000",
+                   "http://127.0.0.1:3000", "localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -68,6 +62,8 @@ app.add_middleware(
 # ---------------------------------------------------------------------------------------------------------------------------------
 
 # Root Example URL
+
+
 @app.get("/")
 async def root():
     """Root
