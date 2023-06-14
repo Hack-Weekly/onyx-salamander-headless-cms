@@ -3,7 +3,7 @@
 Onyx Salamander API Authentication Routes
 """
 import uuid
-from fastapi import APIRouter, HTTPException, status
+from fastapi import APIRouter, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm, HTTPBasicCredentials, HTTPBasic
 from typing import Optional
 
@@ -28,11 +28,6 @@ ROUTE = {
 
 @router.post("/register")
 async def register_user(user:UserRegister):
-    """Checks if a user exists and if not registers the new user, and
-    returns the User instance.
-    """
-
-
     # Check email validity
     if not ValidateEmail(user.email):
         raise HTTPException(
