@@ -1,9 +1,8 @@
-"""onyx/crud/file.py
+"""onyx/blog/file.py
 
 This file handles CRUD functionality for files in the Onyx Salamander CMS
 """
 import uuid
-import hashlib
 from tempfile import SpooledTemporaryFile
 from typing import Optional, List
 from datetime import datetime
@@ -20,12 +19,13 @@ from models.file import File as DBFile
 router = APIRouter()
 
 ROUTE = {
-    "router":router,
-    "prefix":"/crud",
-    "tags":["File"]
+    "router": router,
+    "prefix": "/file",
+    "tags": ["File"]
 }
 
-def GetFileHash(file: SpooledTemporaryFile, block_size:int=2**20):
+
+def GetFileHash(file: SpooledTemporaryFile, block_size: int = 2**20):
     hash = settings.HASH_FUNC()
     while True:
         data = file.read(block_size)
@@ -34,7 +34,8 @@ def GetFileHash(file: SpooledTemporaryFile, block_size:int=2**20):
         hash.update(data)
     return hash.hexdigest()
 
-def GetFileFromDB(UUID:str):
+
+def GetFileFromDB(UUID: str):
     cypher = f"""MATCH (file:File)
     WHERE file.UUID = "{UUID}" 
     RETURN file
@@ -42,8 +43,9 @@ def GetFileFromDB(UUID:str):
     with settings.DB_DRIVER.session() as session:
         res = session.run(query=cypher).data()
         if not res:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"File: {UUID} not found.")
-        res=res[0]
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"File: {UUID} not found.")
+        res = res[0]
     f = DBFile(**res["file"])
     return f
 
@@ -53,19 +55,21 @@ def ReadFileFromStorage(dbFile: DBFile):
         return settings.STORAGE_DRIVER.ReadFile(dbFile.UUID, dbFile.Filename)
 
 # Create
-@router.post("/create/file",response_model=DBFile)
-async def CreateFile(file: UploadFile, description: Optional[str]=None, user: User = Depends(GetCurrentActiveUser)):
+
+
+@router.post("/create", response_model=DBFile)
+async def create_file(file: UploadFile, description: Optional[str] = None, user: User = Depends(GetCurrentActiveUser)):
     date = str(datetime.now(settings.SERVER_TIMEZONE))
     uid = str(uuid.uuid4())
     attributes = {
-        "UUID":uid,
-        "Filename":file.filename,
-        "Type":file.content_type,
-        "SizeBytes":file.size,
-        "Creator":user.UUID,
-        "Modifier":user.UUID,
-        "CreatedDate":date,
-        "ModifiedDate":date,
+        "UUID": uid,
+        "Filename": file.filename,
+        "Type": file.content_type,
+        "SizeBytes": file.size,
+        "Creator": user.UUID,
+        "Modifier": user.UUID,
+        "CreatedDate": date,
+        "ModifiedDate": date,
     }
     if settings.HASH_FILES:
         attributes["Hash"] = await GetFileHash(file)
@@ -81,13 +85,18 @@ async def CreateFile(file: UploadFile, description: Optional[str]=None, user: Us
     RETURN file
     """
     with settings.DB_DRIVER.session() as session:
-        res = session.run(query=cypher, parameters={"params":attributes})
+        res = session.run(query=cypher, parameters={"params": attributes})
         f = res.data()[0]["file"]
     return DBFile(**f)
 
 # Read
-@router.get("/read/file")
-async def ReadFile(download:bool=True, UUID:Optional[str]=None,filename:Optional[str]=None, user:User=Depends(GetCurrentActiveUserAllowGuest)):
+
+
+@router.get("/read/")
+async def read_file(download: bool = True,
+                   UUID: Optional[str] = None,
+                   filename: Optional[str] = None,
+                   user: User = Depends(GetCurrentActiveUserAllowGuest)):
     cypher = """MATCH (file:File)
     """
     if UUID:
@@ -95,15 +104,17 @@ async def ReadFile(download:bool=True, UUID:Optional[str]=None,filename:Optional
     elif filename:
         cypher += f"""WHERE file.Filename = "{filename}" """
     else:
-        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,detail="No UUID or filename provided.")
+        raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST,
+                            detail="No UUID or filename provided.")
 
     cypher += "RETURN file"
 
     with settings.DB_DRIVER.session() as session:
         res = session.run(query=cypher).data()
         if not res:
-            raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail=f"File: {UUID} not found.")
-        res=res[0]
+            raise HTTPException(
+                status_code=status.HTTP_404_NOT_FOUND, detail=f"File: {UUID} not found.")
+        res = res[0]
     f = DBFile(**res["file"])
     file = ReadFileFromStorage(f)
     if download:
@@ -111,8 +122,11 @@ async def ReadFile(download:bool=True, UUID:Optional[str]=None,filename:Optional
     return f
 
 # List
-@router.post("/list/file",response_model=List[DBFile])
-async def ListFile(limit:int=25, user:User=Depends(GetCurrentActiveUserAllowGuest)):
+
+
+@router.post("/list", response_model=List[DBFile])
+async def list_file(limit: int = 25,
+                   user: User = Depends(GetCurrentActiveUserAllowGuest)):
     cypher = f"""MATCH (file:File) RETURN file LIMIT {limit}"""
     files = []
     with settings.DB_DRIVER.session() as session:
@@ -121,26 +135,24 @@ async def ListFile(limit:int=25, user:User=Depends(GetCurrentActiveUserAllowGues
             files.append(DBFile(**file["file"]))
     return files
 
-# Update
-#@router.post("/update/file",response_model=DBFile)
-#async def CreateFile():
-#    pass
 
-# Delete
-@router.post("/delete/file")
-async def DeleteFile(UUID:str, user:User = Depends(GetCurrentActiveUser)):
+@router.post("/delete/{UUID}")
+async def delete_file(UUID: str,
+                     user: User = Depends(GetCurrentActiveUser)):
     cypher = f"""MATCH (file:File)
     WHERE file.UUID = "{UUID}"
     DETACH DELETE file
     """
     f = GetFileFromDB(UUID=UUID)
     if not f:
-        raise HTTPException(status_code=status.HTTP_404_NOT_FOUND,detail="File not found.")
+        raise HTTPException(
+            status_code=status.HTTP_404_NOT_FOUND, detail="File not found.")
     if not user.Admin and f.Creator != user.UUID:
-        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,detail="You are not allowed to delete this file.")
+        raise HTTPException(status_code=status.HTTP_401_UNAUTHORIZED,
+                            detail="You are not allowed to delete this file.")
     settings.STORAGE_DRIVER.DeleteFile(f.UUID)
     with settings.DB_DRIVER.session() as session:
         res = session.run(query=cypher).data()
-    return res or  {
-        "response":f"File {f.Filename} was successfully deleted."
+    return res or {
+        "response": f"File {f.Filename} was successfully deleted."
     }

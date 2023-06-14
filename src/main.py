@@ -7,7 +7,6 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 # from fastapi.middleware.cors import CORSMiddleware
 from starlette.middleware.cors import CORSMiddleware
-import uvicorn
 from onyx import settings
 import auth.auth as auth
 from onyx.routes import ImportRoutes
@@ -20,6 +19,7 @@ app = FastAPI(
     docs_url=settings.DOCS_URL,
     redoc_url=settings.REDOC_URL,
     debug=settings.DEBUG,
+
 )
 
 # Mount static directory
@@ -34,7 +34,7 @@ if settings.USE_TEMPLATES:
 
 # Load Middleware
 for ware in settings.MIDDLEWARE:
-    r = ware.pop('root') # Pull the first item off
+    r = ware.pop('root')  # Pull the first item off
     app.add_middleware(
         r,
         **ware
@@ -52,7 +52,8 @@ ImportRoutes(app)
 # enabling cors and necessary headers and methods for it
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:3000", "http://127.0.0.1:3000", "localhost:3000"],
+    allow_origins=["http://localhost:3000",
+                   "http://127.0.0.1:3000", "localhost:3000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -61,6 +62,8 @@ app.add_middleware(
 # ---------------------------------------------------------------------------------------------------------------------------------
 
 # Root Example URL
+
+
 @app.get("/")
 async def root():
     """Root
@@ -68,4 +71,3 @@ async def root():
     Returns the index of the API
     """
     return {"message": "Hello World"}
-

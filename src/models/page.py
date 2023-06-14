@@ -6,6 +6,7 @@ from typing import Optional, List
 from pydantic import BaseModel
 from datetime import datetime
 
+
 class URI(BaseModel):
     """URI represents a URL within the Onyx Salamander CMS
 
@@ -26,6 +27,8 @@ class URI(BaseModel):
     ArchivedDate: Optional[datetime] = None
 
 # Page Model
+
+
 class Page(BaseModel):
     """Page represents a single web page within the Onyx Salamander CMS.
     """
@@ -43,13 +46,12 @@ class Page(BaseModel):
     Keywords: Optional[List[str]] = None
 
     # User Metadata
-    Modifier: Optional[str] = None # Who last modified page
-    Creator: Optional[str] = None # Who created the page
-    Owner:  Optional[str] = None # Who owns the page
+    Modifier: Optional[str] = None  # Who last modified page
+    Creator: Optional[str] = None  # Who created the page
+    Owner:  Optional[str] = None  # Who owns the page
     # Datetime Metadata
     CreatedDate: Optional[datetime] = None
     ModifiedDate: Optional[datetime] = None
-    PublishDate: Optional[datetime] = None # Can be used to time page creation
+    PublishDate: Optional[datetime] = None  # Can be used to time page creation
     ReviewDate: Optional[datetime] = None
     ArchiveDate: Optional[datetime] = None
-    

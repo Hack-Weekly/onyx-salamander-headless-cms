@@ -32,12 +32,13 @@ _windows_device_files = {
     *(f"LPT{i}" for i in range(10)),
 }
 
+
 def secure_filename(filename: str) -> str:
     """Used to secure filenames.
     """
 
     filename = unicodedata.normalize("NFKD", filename)
-    filename = filename.encode("ascii","ignore").decode("ascii")
+    filename = filename.encode("ascii", "ignore").decode("ascii")
     for sep in os.sep, os.path.altsep:
         if sep:
             filename = filename.replace(sep, " ")
@@ -109,7 +110,8 @@ class cached_property(property, t.Generic[_T]):
         if obj_dict is not None:
             value: _T = obj_dict.get(self.__name__, _missing)
         else:
-            value = getattr(obj, self.slot_name, _missing)  # type: ignore[arg-type]
+            # type: ignore[arg-type]
+            value = getattr(obj, self.slot_name, _missing)
 
         if value is _missing:
             value = self.fget(obj)  # type: ignore

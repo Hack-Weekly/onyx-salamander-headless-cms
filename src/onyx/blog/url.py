@@ -1,4 +1,4 @@
-"""onyx/crud/crud_url.py
+"""onyx/blog/crud_url.py
 
 This file handles CRUD functionality for URL's and Links in the Onyx Salamander CMS
 """
@@ -22,7 +22,7 @@ router = APIRouter()
 
 ROUTE = {
         "router":router,
-        "prefix":"/crud",
+        "prefix":"/url",
         "tags":["URL"]
 } 
 
@@ -86,8 +86,8 @@ def _CreateURL(url: str,
                 url_data = res.data()[0]["url"]
     return URI(**url_data)
 
-@router.post("/create/url", response_model=URI)
-async def CreateURL(url: str,
+@router.post("/create", response_model=URI)
+async def create_url(url: str,
                     description: Optional[str] = None,
                     requireAuth: Optional[bool] = False,
                     requireGroup: Optional[List[str]] = None,
@@ -98,8 +98,8 @@ async def CreateURL(url: str,
                       requireAuth=requireAuth, requiresGroup=requireGroup,
                       user=user)
 
-@router.post("/read/url/{url}", response_model=URI)
-async def ReadURL(url: str, user: User = Depends(GetCurrentActiveUserAllowGuest)):
+@router.post("/read/{url}", response_model=URI)
+async def read_url(url: str, user: User = Depends(GetCurrentActiveUserAllowGuest)):
     url = GetURL(url=url)
     # Check if requires access
     if url.RequiresAuth:
@@ -109,23 +109,10 @@ async def ReadURL(url: str, user: User = Depends(GetCurrentActiveUserAllowGuest)
                 detail=f"URL: {url} requires login.",
                 headers={"WWW-Authenticate":"Bearer"}
             )
-        # Check if requires group access
-        #if url.RequiresGroup:
-        #    in_group = False
-        #    for group in url.RequiresGroup:
-        #        if group in user.Groups:
-        #            in_group = True
-        #            break
-        #    if not in_group:
-        #        raise HTTPException(
-        #            status_code=status.HTTP_401_UNAUTHORIZED,
-        #            detail=f"You do not have access to {url}.",
-        #            headers={"WWW-Authenticate":"Bearer"}
-        #        )
     return url
     
-@router.put("/update/url/{url}", response_model=URI)
-async def UpdateURL(url: str,
+@router.put("/update/{url}", response_model=URI)
+async def update_url(url: str,
                     attributes:dict,
                     description: Optional[str] = None,
                     requireAuth: Optional[bool] = None,
@@ -173,8 +160,8 @@ async def UpdateURL(url: str,
         url = update.data()[0]["url"]
     return URI(**url)
 
-@router.get("/list/urls")
-async def ListURL(limit:int=25,
+@router.get("/list")
+async def list_url(limit:int=25,
                   user: User = Depends(GetCurrentActiveUserAllowGuest)):
     """ListURL returns a list of URLs
     """
@@ -196,8 +183,8 @@ async def ListURL(limit:int=25,
     
     return urls
 
-@router.post("/delete/url/{url}")
-async def DeleteURL(url:str, user:User = Depends(GetCurrentActiveUser)):
+@router.post("/delete/{url}")
+async def delete_url(url:str, user:User = Depends(GetCurrentActiveUser)):
     rl = GetURL(url=url)
     if rl and not rl.Creator == user.UUID:
         raise HTTPException(

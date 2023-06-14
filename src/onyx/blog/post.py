@@ -21,17 +21,20 @@ from models.page import Page, URI
 router = APIRouter()
 
 ROUTE = {
-    "router":router,
-    "prefix":"/blog",
-    "tags":["Blog"]
+    "router": router,
+    "prefix": "/blog",
+    "tags": ["Blog"]
 }
 
-def GetBlogPost(UUID:Optional[str]=None,title:Optional[str]=None,user:Optional[User]=None):
+
+def GetBlogPost(UUID: Optional[str] = None,
+                title: Optional[str] = None,
+                user: Optional[User] = None):
     if UUID:
         cypher_search = f"MATCH (post:BlogPost) WHERE post.UUID = '{UUID}' "
     elif title:
         cypher_search = f"MATCH (post:BlogPost) WHERE post.Title = '{title}'"
-    
+
     if not user:
         cypher_search += "AND post.Published = True"
     elif not user.Admin:
@@ -45,31 +48,33 @@ def GetBlogPost(UUID:Optional[str]=None,title:Optional[str]=None,user:Optional[U
             return BlogPost(**result[0]["post"])
 
 # Create
-@router.post("/create",response_model=BlogPost)
-async def CreateBlogPost(title:str, content:str,
-                        published: Optional[bool]=False,
-                        tags: Optional[List[str]]=None,
-                        keywords: Optional[List[str]]=None,
-                        user: User = Depends(GetCurrentActiveUser)):
+
+
+@router.post("/create", response_model=BlogPost)
+async def create_blog_post(title: str, content: str,
+                           published: Optional[bool] = False,
+                           tags: Optional[List[str]] = None,
+                           keywords: Optional[List[str]] = None,
+                           user: User = Depends(GetCurrentActiveUser)):
     date = str(datetime.now(settings.SERVER_TIMEZONE))
     attributes = {
-        "UUID":str(uuid.uuid4()),
-        "Title":title,
-        "Content":content,
-        "Creator":user.UUID,
-        "Modifier":user.UUID,
-        "Owner":user.UUID,
-        "CreatedDate":date,
-        "ModifiedDate":date
+        "UUID": str(uuid.uuid4()),
+        "Title": title,
+        "Content": content,
+        "Creator": user.UUID,
+        "Modifier": user.UUID,
+        "Owner": user.UUID,
+        "CreatedDate": date,
+        "ModifiedDate": date
     }
     if published:
-        attributes["Published"]=published
-        attributes["PublishedDate"]=date
+        attributes["Published"] = published
+        attributes["PublishedDate"] = date
     if tags:
-        attributes["Tags"]=tags
+        attributes["Tags"] = tags
     if keywords:
-        attributes["Keywords"]=keywords
-    
+        attributes["Keywords"] = keywords
+
     cypher = f"""MATCH (user:User) WHERE user.UUID = "{user.UUID}"
     CREATE (post:BlogPost $params)
     CREATE (user)-[relationship:OWNS]->(post)
@@ -78,18 +83,26 @@ async def CreateBlogPost(title:str, content:str,
     """
 
     with settings.DB_DRIVER.session() as session:
-        res = session.run(query=cypher, parameters={"params":attributes})
+        res = session.run(query=cypher, parameters={"params": attributes})
         post = BlogPost(**res.data()[0]["post"])
     return post
 
 # Read
-@router.post("/read",response_model=Optional[BlogPost])
-async def ReadBlogPost(UUID:Optional[str]=None,title:Optional[str]=None, user:User=Depends(GetCurrentActiveUserAllowGuest)):
-    return GetBlogPost(UUID=UUID,title=title,user=user)
+
+
+@router.get("/read", response_model=Optional[BlogPost])
+async def read_blog_post(UUID: Optional[str] = None,
+                         title: Optional[str] = None,
+                         user: User = Depends(GetCurrentActiveUserAllowGuest)):
+    return GetBlogPost(UUID=UUID, title=title, user=user)
 
 # List
-@router.get("/list",response_model=List[BlogPost])
-async def ListBlogPosts(limit:int=25, order_by:Optional[str]=None, user:User=Depends(GetCurrentActiveUserAllowGuest)):
+
+
+@router.get("/list", response_model=List[BlogPost])
+async def list_blog_posts(limit: int = 25,
+                          order_by: Optional[str] = None,
+                          user: User = Depends(GetCurrentActiveUserAllowGuest)):
     if not user:
         cypher = f"MATCH (post:BlogPost) WHERE post.Published = True RETURN post LIMIT {limit}"
     elif not user.Admin:
@@ -99,7 +112,7 @@ async def ListBlogPosts(limit:int=25, order_by:Optional[str]=None, user:User=Dep
         RETURN post
         LIMIT {limit}
         """
-    elif user.Admin==True:
+    elif user.Admin == True:
         cypher = "MATCH (post:BlogPost) RETURN post LIMIT {limit}"
 
     if order_by:
@@ -113,8 +126,12 @@ async def ListBlogPosts(limit:int=25, order_by:Optional[str]=None, user:User=Dep
     return posts
 
 # Update
-@router.post("/update",response_model=BlogPost)
-async def UpdateBlogPost(UUID:str, attributes:dict, user:User = Depends(GetCurrentActiveUser)):
+
+
+@router.post("/update/{UUID}", response_model=BlogPost)
+async def update_blog_post(UUID: str,
+                           attributes: dict,
+                           user: User = Depends(GetCurrentActiveUser)):
     date = str(datetime.now(settings.SERVER_TIMEZONE))
     post = GetBlogPost(UUID=UUID, user=user)
     if not post:
@@ -141,14 +158,17 @@ async def UpdateBlogPost(UUID:str, attributes:dict, user:User = Depends(GetCurre
         if key in settings.BASE_PROPERTIES:
             del attributes[key]
     with settings.DB_DRIVER.session() as session:
-        res = session.run(query=cypher,parameters={"attributes":attributes})
+        res = session.run(query=cypher, parameters={"attributes": attributes})
         updated = BlogPost(**res.data()[0]["post"])
     return updated
 
 # Delete
-@router.post("/delete")
-async def DeleteBlogPost(UUID:str, user:User = Depends(GetCurrentActiveUser)):
-    post = GetBlogPost(UUID=UUID,user=user)
+
+
+@router.post("/delete/{UUID}")
+async def delete_blog_post(UUID: str,
+                           user: User = Depends(GetCurrentActiveUser)):
+    post = GetBlogPost(UUID=UUID, user=user)
     if not post:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
@@ -162,5 +182,5 @@ async def DeleteBlogPost(UUID:str, user:User = Depends(GetCurrentActiveUser)):
     with settings.DB_DRIVER.session() as session:
         res = session.run(query=cypher).data()
     return res or {
-        "response":f"Blog post {UUID} was successfully deleted."
+        "response": f"Blog post {UUID} was successfully deleted."
     }

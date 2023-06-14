@@ -17,15 +17,17 @@ from models.user import User
 router = APIRouter()
 
 ROUTE = {
-        "router":router,
-        "prefix":"/crud",
-        "tags":["CRUD"]
-} 
+    "router": router,
+    "prefix": "/crud",
+    "tags": ["CRUD"]
+}
+
 
 @router.post("/create/node", response_model=Node)
-async def CreateNode(label: str, node_attributes: dict,
-                     current_user: User = Depends(GetCurrentActiveUser)):
-    """CreateNode - Creates a node with label and attributes
+async def create_node(label: str,
+                      node_attributes: dict,
+                      current_user: User = Depends(GetCurrentActiveUser)):
+    """create_node - Creates a node with label and attributes
         label: str
         node_attributes: dict
         current_user: User
@@ -38,7 +40,7 @@ async def CreateNode(label: str, node_attributes: dict,
         raise HTTPException(
             status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
             detail=f"Operation not permitted, cannot create {label} with this method.",
-            headers={"WWW-Authenticate":"Bearer"}
+            headers={"WWW-Authenticate": "Bearer"}
         )
     # Check if we are restricting the types of nodes we can create
     if settings.RESTRICT_DB:
@@ -46,7 +48,7 @@ async def CreateNode(label: str, node_attributes: dict,
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=f"Operation not permitted, cannot create {label} with this method.",
-                headers={"WWW-Authenticate":"Bearer"}
+                headers={"WWW-Authenticate": "Bearer"}
             )
     # Check that attributes dictionary does not modify base fields
     unpacked = ""
@@ -55,10 +57,10 @@ async def CreateNode(label: str, node_attributes: dict,
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=f"Operation not permitted. You cannot modify those fields with this method.",
-                headers={"WWW-Authenticate":"Bearer"}
+                headers={"WWW-Authenticate": "Bearer"}
             )
         if len(unpacked) > 0:
-            unpacked+="\n"
+            unpacked += "\n"
         unpacked += f"SET new_node.{key}='{value}'"
     uid = str(uuid.uuid4())
 
@@ -76,7 +78,7 @@ async def CreateNode(label: str, node_attributes: dict,
             parameters={
                 "created_by": current_user.Email,
                 "created_time": str(datetime.now(settings.SERVER_TIMEZONE)),
-                "attributes":node_attributes
+                "attributes": node_attributes
             },
         )
         node_data = result.data()[0]
@@ -85,9 +87,12 @@ async def CreateNode(label: str, node_attributes: dict,
                 LABELS=node_data["labels"],
                 Properties=node_data["new_node"])
 # List Nodes
+
+
 @router.get("/list/nodes", response_model=Nodes)
-async def ListNodes(limit:int=25, current_user: User=Depends(GetCurrentActiveUser)):
-    """ListNodes, lists as many nodes as requested"""
+async def list_nodes(limit: int = 25,
+                     current_user: User = Depends(GetCurrentActiveUser)):
+    """list_nodes, lists as many nodes as requested"""
     cypher = f"""MATCH (node)
     RETURN ID(node) as id, LABELS(node) as labels, node
     LIMIT {limit}"""
@@ -105,9 +110,12 @@ async def ListNodes(limit:int=25, current_user: User=Depends(GetCurrentActiveUse
     return Nodes(Nodes=node_list)
 
 # Search Nodes
+
+
 @router.get("/search/nodes", response_model=Nodes)
-async def SearchNodes(node_property: str, property_value: str,
-                    current_user: User = Depends(GetCurrentActiveUser)):
+async def search_nodes(node_property: str,
+                       property_value: str,
+                       current_user: User = Depends(GetCurrentActiveUser)):
     """SearchNodes
     Retrieves data about a collection of nodes in the graph based on node properties
     """
@@ -128,8 +136,12 @@ async def SearchNodes(node_property: str, property_value: str,
     return Nodes(Nodes=node_list)
 
 # Update Node
+
+
 @router.put("/update/node/{node_id}")
-async def UpdateNode(node_id: int, attributes: dict, current_user: User = Depends(GetCurrentActiveUser)):
+async def update_node(node_id: int,
+                      attributes: dict,
+                      current_user: User = Depends(GetCurrentActiveUser)):
     cypher = """MATCH (node) WHERE ID(node) = $id
     SET node += $attributes
     RETURN node, ID(node) as id, LABELS(node) as labels
@@ -137,15 +149,18 @@ async def UpdateNode(node_id: int, attributes: dict, current_user: User = Depend
 
     with settings.DB_DRIVER.session() as session:
         result = session.run(query=cypher,
-                             parameters={"id":node_id,"attributes":attributes})
+                             parameters={"id": node_id, "attributes": attributes})
         node_data = result.data()[0]
     return Node(NODE_ID=node_data["id"],
                 LABELS=node_data["labels"],
                 **node_data["node"])
 
 # Delete Node
+
+
 @router.post("/delete/node/{node_id}")
-async def DeleteNode(node_id: int, current_user: User = Depends(GetCurrentActiveUser)):
+async def delete_node(node_id: int,
+                      current_user: User = Depends(GetCurrentActiveUser)):
     cypher = f"""
     MATCH (node)
     WHERE ID(node) = "{node_id}"
@@ -159,11 +174,18 @@ async def DeleteNode(node_id: int, current_user: User = Depends(GetCurrentActive
     }
 
 # Relationships
+
+
 @router.post("/create/relationship", response_model=Relationship)
-async def CreateRelationship(source_label: str, source_property:str, source_value:str,
-                             target_label: str, target_property:str, target_value:str,
-                             relationship_type:str, relationship_attributes:Optional[dict]=None,
-                             current_user = Depends(GetCurrentActiveUser)):
+async def create_relationship(source_label: str,
+                              source_property: str,
+                              source_value: str,
+                              target_label: str,
+                              target_property: str,
+                              target_value: str,
+                              relationship_type: str,
+                              relationship_attributes: Optional[dict] = None,
+                              current_user=Depends(GetCurrentActiveUser)):
     """CreateRelationship - Creates a relationship between two nodes"""
     # Check that node is not a restricted Node
     if settings.RESTRICT_DB:
@@ -171,18 +193,18 @@ async def CreateRelationship(source_label: str, source_property:str, source_valu
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail="Operation not permitted, relationship type not allowed.",
-                headers={"WWW-Authenticate":"Bearer"}
+                headers={"WWW-Authenticate": "Bearer"}
             )
-    unpacked=""
+    unpacked = ""
     for key, value in relationship_attributes.items():
         if key in settings.BASE_PROPERTIES:
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
                 detail=f"Operation not permitted. You cannot modify those fields with this method.",
-                headers={"WWW-Authenticate":"Bearer"}
+                headers={"WWW-Authenticate": "Bearer"}
             )
         if len(unpacked) > 0:
-            unpacked+="\n"
+            unpacked += "\n"
         unpacked += f"SET relationship.{key}='{value}'"
     cypher = f"""
     MATCH (nodeA:{source_label}) WHERE nodeA.{source_property} = '{source_value}'
@@ -197,13 +219,13 @@ async def CreateRelationship(source_label: str, source_property:str, source_valu
 
     with settings.DB_DRIVER.session() as session:
         result = session.run(query=cypher,
-            parameters={
-                "created_time": str(datetime.now(settings.SERVER_TIMEZONE))
-            }
-        )
+                             parameters={
+                                 "created_time": str(datetime.now(settings.SERVER_TIMEZONE))
+                             }
+                             )
         rel_data = result.data()
         print(rel_data)
-        rel_data=rel_data[0]
+        rel_data = rel_data[0]
     # Convert data to nodes
     source = Node(NODE_ID=rel_data["ID(nodeA)"],
                   LABELS=rel_data["LABELS(nodeA)"],
@@ -219,8 +241,11 @@ async def CreateRelationship(source_label: str, source_property:str, source_valu
                         TargetNode=target)
 
 # Read data about a relationship
+
+
 @router.get("/read/relationship/{relationship_id}", response_model=Relationship)
-async def ReadRelationship(relationship_id: int, user:User = Depends(GetCurrentActiveUser)):
+async def read_relationship(relationship_id: int,
+                            user: User = Depends(GetCurrentActiveUser)):
     cypher = f"""
     MATCH (nodeA)-[relationship]->(nodeB)
     WHERE ID(relationship) = {relationship_id}
@@ -245,8 +270,12 @@ async def ReadRelationship(relationship_id: int, user:User = Depends(GetCurrentA
                         TargetNode=target)
 
 # Update Relationship
+
+
 @router.put("/update/relationship/{relationship_id}", response_model=Relationship)
-async def UpdateRelationship(relationship_id: int, attributes: dict, user:User = Depends(GetCurrentActiveUser)):
+async def update_relationship(relationship_id: int,
+                              attributes: dict,
+                              user: User = Depends(GetCurrentActiveUser)):
     cypher = """
     MATCH (nodeA)-[relationship]->(nodeB)
     WHERE ID(relationship) = $rel_id
@@ -257,8 +286,8 @@ async def UpdateRelationship(relationship_id: int, attributes: dict, user:User =
     with settings.DB_DRIVER.session() as session:
         result = session.run(query=cypher,
                              parameters={
-                                 "rel_id":relationship_id,
-                                 "attributes":attributes
+                                 "rel_id": relationship_id,
+                                 "attributes": attributes
                              })
         rel_data = result.data()[0]
 
@@ -277,8 +306,11 @@ async def UpdateRelationship(relationship_id: int, attributes: dict, user:User =
                         TargetNode=target)
 
 # Delete relationship
+
+
 @router.post("/delete/relationship/{relationship_id}")
-async def DeleteRelationship(relationship_id: int, user:User = Depends(GetCurrentActiveUser)):
+async def delete_relationship(relationship_id: int,
+                              user: User = Depends(GetCurrentActiveUser)):
     cypher = f"""
     MATCH (nodeA)-[relationship]->(nodeB)
     WHERE ID(relationship) = {relationship_id}
@@ -289,5 +321,5 @@ async def DeleteRelationship(relationship_id: int, user:User = Depends(GetCurren
         rel = result.data()
     # rel should be empty, if not this _should_ return an error message
     return rel or {
-        "response":f"Relationship with ID: {relationship_id} was successfully deleted."
+        "response": f"Relationship with ID: {relationship_id} was successfully deleted."
     }

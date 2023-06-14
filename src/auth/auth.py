@@ -5,79 +5,60 @@ Onyx Salamander API Authentication Routes
 import uuid
 from fastapi import APIRouter, HTTPException, status, Request
 from fastapi.security import OAuth2PasswordRequestForm, HTTPBasicCredentials, HTTPBasic
-from typing import Optional, List
+from typing import Optional
+
+# Onyx imports
 from onyx import settings
 from auth.utils import *
 from models.base import Token, TokenData
-from models.user import User
+from models.user import User, UserRegister
 from datetime import datetime
 
 # API Router
 router = APIRouter()
 
 ROUTE = {
-        "router":router,
-        "prefix":settings.AUTH_ENDPOINT,
-        "tags":["Authorization"]
-} 
+    "router": router,
+    "prefix": settings.AUTH_ENDPOINT,
+    "tags": ["Authorization"]
+}
 
 # Endpoint for registration
+
+
 @router.post("/register")
-async def RegisterUser(request: Request):
-# async def RegisterUser(screenName: str, email: str, password: str,
-#                        phone: Optional[str] = None,
-#                        fname: Optional[str] = None,
-#                        mname: Optional[str] = None,
-#                        lname: Optional[str] = None):
-    """Checks if a user exists and if not registers the new user, and
-    returns the User instance.
-    """
-
-    data = await request.json()
-
-    # print(data)
-
-    screenName = data['screenName']
-    email: data['email']
-    password: data['password']
-    phone = data['phone']
-    fname = data['fname']
-    mname = data['mname']
-    lname = data['lname']
-
-    # print(email)
-
+async def register_user(user:UserRegister):
     # Check email validity
-    if not ValidateEmail(email):
+    if not ValidateEmail(user.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Email {email} is not a valid email address.",
+            detail=f"Email {user.email} is not a valid email address.",
             headers={"WWW-Authenticate": "Bearer"}
         )
     # Check password complexity
-    if settings.FORCE_COMPLEX and not ValidatePasswordComplexity(password):
+    if settings.FORCE_COMPLEX and not ValidatePasswordComplexity(user.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Password {password} must have a minimum of 8 characters, 1 upper case, 1 lower case, 1 number, and 1 special char.",
+            detail=f"Password {user.password} must have a minimum of 8 characters, 1 upper case, 1 lower case, 1 number, and 1 special char.",
             headers={"WWW-Authenticate": "Bearer"}
         )
     # Create a salt
-    salt, saltPos = CreateSalt(len(password))
-    salted = SaltPassword(password, salt, saltPos)
+    salt, saltPos = CreateSalt(len(user.password))
+    salted = SaltPassword(user.password, salt, saltPos)
     # Hash the password
     phash = CreatePasswordHash(salted)
     # Create dictionary of new user attributes
     attributes = {
-        "ScreenName": screenName,
-        "Email": email,
+        "ScreenName": user.screenName,
+        "Email": user.email,
         "HashedPassword": phash,
-        "UUID":str(uuid.uuid4()),
+        "UUID": str(uuid.uuid4()),
         "Salt": salt,
         "SaltPos": saltPos,
-        "Phone": phone,
-        "FirstName": fname,
-        "MiddleName": mname,
-        "LastName": lname,
+        "Phone": user.phone,
+        "FirstName": user.fname,
+        "MiddleName": user.mname,
+        "LastName": user.lname,
         "LastSeen": str(datetime.now(settings.SERVER_TIMEZONE)),
         "Joined": str(datetime.now(settings.SERVER_TIMEZONE)),
         "Disabled": False,
@@ -87,10 +68,10 @@ async def RegisterUser(request: Request):
 
     with settings.DB_DRIVER.session() as session:
         # Check if user exists
-        if GetUser(email):
+        if GetUser(user.email):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Operation not permitted, user with email: {email} already exists.",
+                detail=f"Operation not permitted, user with email: {user.email} already exists.",
                 headers={"WWW-Authenticate": "Bearer"}
             )
         # Otherwise, create a new user
@@ -103,7 +84,7 @@ async def RegisterUser(request: Request):
 
 
 @router.post("/login", response_model=User)
-async def LoginHTTPBasic(credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
+async def login_HTTP_basic(credentials: HTTPBasicCredentials = Depends(HTTPBasic())):
     if not settings.ENABLE_HTTP_AUTH:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="HTTP Basic Authentication Has Been Disabled.")
@@ -116,8 +97,9 @@ async def LoginHTTPBasic(credentials: HTTPBasicCredentials = Depends(HTTPBasic()
         )
     return user
 
+
 @router.post("/token", response_model=Token)
-async def LoginAccessToken(form_data: OAuth2PasswordRequestForm = Depends(), expires: Optional[timedelta] = None):
+async def login_access_token(form_data: OAuth2PasswordRequestForm = Depends(), expires: Optional[timedelta] = None):
     if not settings.ENABLE_BEARER_AUTH:
         raise HTTPException(status_code=status.HTTP_403_FORBIDDEN,
                             detail="Token Authentication Has Been Disabled")
