@@ -24,6 +24,8 @@ DOCS_URL = "/docs"
 REDOC_URL = "/redoc"
 DEBUG = True  # Turn off in production
 HOST = "0.0.0.0"  # IP address of host
+CLIENT_IP = "127.0.0.1" # IP Address for web client
+CLIENT_PORT = "3000" # Port for web client
 PORT = 8000  # Port of host
 SERVER_TIMEZONE = timezone.utc
 
@@ -101,6 +103,9 @@ BASE_PROPERTIES = ["created_by", "created_time",
 ALLOWED_ORIGINS = [
     f"http://{HOST}:{PORT}",
     f"https://{HOST}:{PORT}",
+    f"http://{CLIENT_IP}:{CLIENT_PORT}",
+    f"http://localhost:{CLIENT_PORT}",
+    f"localhost:{CLIENT_PORT}"
 ]
 
 # What methods are allowed
@@ -113,8 +118,6 @@ ALLOW_HEADERS = ["*"]
 if DEBUG:
     ALLOWED_ORIGINS.append(f"http://localhost:{PORT}")
     ALLOWED_ORIGINS.append(f"https://localhost:{PORT}")
-    ALLOWED_ORIGINS.append("http://localhost:*")
-    ALLOWED_ORIGINS.append("*")
 
 CORS_MAX_AGE = 600  # Max time in seconds to cache cors request
 

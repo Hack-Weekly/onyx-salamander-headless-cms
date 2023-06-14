@@ -11,7 +11,7 @@ from typing import Optional
 from onyx import settings
 from auth.utils import *
 from models.base import Token, TokenData
-from models.user import User
+from models.user import User, UserRegister
 from datetime import datetime
 
 # API Router
@@ -27,45 +27,41 @@ ROUTE = {
 
 
 @router.post("/register")
-async def register_user(screenName: str, email: str, password: str,
-                       phone: Optional[str] = None,
-                       fname: Optional[str] = None,
-                       mname: Optional[str] = None,
-                       lname: Optional[str] = None):
+async def register_user(user:UserRegister):
     """Checks if a user exists and if not registers the new user, and
     returns the User instance.
     """
     # Check email validity
-    if not ValidateEmail(email):
+    if not ValidateEmail(user.email):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Email {email} is not a valid email address.",
+            detail=f"Email {user.email} is not a valid email address.",
             headers={"WWW-Authenticate": "Bearer"}
         )
     # Check password complexity
-    if settings.FORCE_COMPLEX and not ValidatePasswordComplexity(password):
+    if settings.FORCE_COMPLEX and not ValidatePasswordComplexity(user.password):
         raise HTTPException(
             status_code=status.HTTP_400_BAD_REQUEST,
-            detail=f"Password {password} must have a minimum of 8 characters, 1 upper case, 1 lower case, 1 number, and 1 special char.",
+            detail=f"Password {user.password} must have a minimum of 8 characters, 1 upper case, 1 lower case, 1 number, and 1 special char.",
             headers={"WWW-Authenticate": "Bearer"}
         )
     # Create a salt
-    salt, saltPos = CreateSalt(len(password))
-    salted = SaltPassword(password, salt, saltPos)
+    salt, saltPos = CreateSalt(len(user.password))
+    salted = SaltPassword(user.password, salt, saltPos)
     # Hash the password
     phash = CreatePasswordHash(salted)
     # Create dictionary of new user attributes
     attributes = {
-        "ScreenName": screenName,
-        "Email": email,
+        "ScreenName": user.screenName,
+        "Email": user.email,
         "HashedPassword": phash,
         "UUID": str(uuid.uuid4()),
         "Salt": salt,
         "SaltPos": saltPos,
-        "Phone": phone,
-        "FirstName": fname,
-        "MiddleName": mname,
-        "LastName": lname,
+        "Phone": user.phone,
+        "FirstName": user.fname,
+        "MiddleName": user.mname,
+        "LastName": user.lname,
         "LastSeen": str(datetime.now(settings.SERVER_TIMEZONE)),
         "Joined": str(datetime.now(settings.SERVER_TIMEZONE)),
         "Disabled": False,
@@ -75,10 +71,10 @@ async def register_user(screenName: str, email: str, password: str,
 
     with settings.DB_DRIVER.session() as session:
         # Check if user exists
-        if GetUser(email):
+        if GetUser(user.email):
             raise HTTPException(
                 status_code=status.HTTP_422_UNPROCESSABLE_ENTITY,
-                detail=f"Operation not permitted, user with email: {email} already exists.",
+                detail=f"Operation not permitted, user with email: {user.email} already exists.",
                 headers={"WWW-Authenticate": "Bearer"}
             )
         # Otherwise, create a new user
