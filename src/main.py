@@ -26,10 +26,6 @@ if settings.USE_STATIC:
     app.mount(settings.STATIC_ROUTE,
               StaticFiles(directory=settings.STATIC_DIR),
               name="static")
-    
-#    app.mount("/uploads",
-#              StaticFiles(directory=settings.UPLOAD_DIR),
-#              name="uploads")
 
 # Handle templating
 if settings.USE_TEMPLATES:
@@ -45,20 +41,8 @@ for ware in settings.MIDDLEWARE:
 
 # Include Routes
 ImportRoutes(app)
-# Authentication Routes
-#app.include_router(
-#    auth.router,
-#    prefix=settings.AUTH_ENDPOINT,
-#    tags=["Authorization"]
-#)
-#
-## Crud Routes
-#app.include_router(
-#    core.router,
-#    prefix="/crud",
-#    tags=["CRUD"]
-#)
-#
+
+
 # Root Example URL
 @app.get("/")
 async def root():

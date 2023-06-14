@@ -6,7 +6,6 @@ This represents a blog post within the Onyx Salamander CMS.
 from typing import Optional, List
 from pydantic import BaseModel
 from datetime import datetime
-from models.base import Node
 
 class BlogPost(BaseModel):
     UUID: str

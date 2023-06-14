@@ -1,19 +1,20 @@
 from collections.abc import Iterable
 from fastapi import FastAPI
 from onyx import settings
-from onyx.crud import core, page, url, file
-from onyx.blog import post
+from onyx.crud import core
+from onyx.blog import post, page, url, file, comment
 from auth import auth
 
 # Authentication Routes
 ROUTES = [
-    post.ROUTE,
-    page.page_router,
     auth.ROUTE,
+    page.ROUTE,
+    page.page_router,
     core.ROUTE,
     url.ROUTE,
-    page.ROUTE,
+    post.ROUTE,
     file.ROUTE,
+    comment.ROUTE
 ]
 
 
